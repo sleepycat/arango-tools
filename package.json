@@ -1,0 +1,29 @@
+{
+  "name": "arangoinit",
+  "version": "1.0.0",
+  "description": "an init container for arangodb pods",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dbg": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test": "jest --coverage"
+  },
+  "author": "Mike Williamson",
+  "license": "MIT",
+  "dependencies": {
+    "arangojs": "^6.9.0"
+  },
+  "devDependencies": {
+    "dotenv-safe": "^6.1.0",
+    "eslint": "^5.8.0",
+    "eslint-config-prettier": "^3.1.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^21.26.2",
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "jest": "^23.6.0",
+    "prettier": "^1.14.3"
+  }
+}
