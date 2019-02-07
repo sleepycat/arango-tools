@@ -1,7 +1,7 @@
 {
-  "name": "arangoinit",
+  "name": "arango-tools",
   "version": "1.0.0",
-  "description": "an init container for arangodb pods",
+  "description": "tools for working with ArangoDB",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -25,5 +25,9 @@
     "eslint-plugin-standard": "^4.0.0",
     "jest": "^23.6.0",
     "prettier": "^1.14.3"
-  }
+  },
+  "files": [
+    "index.js",
+    "src/utils.js"
+  ]
 }
