@@ -1,12 +1,6 @@
 const { Database } = require('arangojs')
 require('dotenv-safe').config()
-const {
-  ArangoTools,
-  createUser,
-  grantAccess,
-  dbNameFromFile,
-  getFilenameFromPath,
-} = require('../utils')
+const { ArangoTools, dbNameFromFile, getFilenameFromPath } = require('../utils')
 
 const { DB_USER: user, DB_URL: url, DB_PASSWORD: password } = process.env
 
@@ -19,6 +13,7 @@ describe('ArangoTools', () => {
     sys.useDatabase('_system')
     sys.useBasicAuth('root', 'test')
   })
+
   it('returns an object with a makeDatabase property', async () => {
     expect(ArangoTools({ rootPass, url })).toHaveProperty('makeDatabase')
   })
@@ -40,10 +35,12 @@ describe('ArangoTools', () => {
 
       expect(response).toEqual(
         expect.objectContaining({
-          db: expect.any(Object),
+          query: expect.any(Function),
           drop: expect.any(Function),
           truncate: expect.any(Function),
-          collections: expect.any(Object),
+          collections: expect.objectContaining({
+            data: expect.any(Object),
+          }),
         }),
       )
     })
@@ -95,27 +92,6 @@ describe('ArangoTools', () => {
   describe('getFilenameFromPath', () => {
     it('returns the filename given an absolute path', async () => {
       expect(getFilenameFromPath(__filename)).toEqual('utils.test.js')
-    })
-  })
-
-  describe('createUser', () => {
-    it('creates a user in ArangoDB', async () => {
-      let user = await createUser(sys, {
-        user: 'mike',
-        passwd: 'soopersekret',
-      })
-      expect(user).toEqual({ active: true, extra: {}, user: 'mike' })
-    })
-  })
-
-  describe('grantAccess', () => {
-    it('gives an ArangoDB user permissions on a database', async () => {
-      let { user } = await createUser(sys, {
-        user: 'mike',
-        passwd: 'soopersekret',
-      })
-      let permission = await grantAccess(sys, '_system', user)
-      expect(permission).toEqual({ _system: 'rw', code: 200, error: false })
     })
   })
 
