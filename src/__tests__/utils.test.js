@@ -64,10 +64,15 @@ describe('ArangoTools', () => {
 
       expect(response).toEqual(
         expect.objectContaining({
-          db: expect.any(Object),
+          query: expect.any(Function),
           drop: expect.any(Function),
           truncate: expect.any(Function),
-          collections: expect.any(Object),
+          collections: expect.objectContaining({
+            data: expect.objectContaining({
+              save: expect.any(Function),
+              import: expect.any(Function),
+            }),
+          }),
         }),
       )
     })
