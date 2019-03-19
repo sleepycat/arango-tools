@@ -1,4 +1,3 @@
-const { parse } = require('path')
 const { Database } = require('arangojs')
 require('dotenv-safe').config()
 const { deleteUser } = require('../deleteUser')
@@ -36,8 +35,8 @@ describe('createUser', () => {
   })
 
   it(`doesn't barf if the user does not exist`, async () => {
-    expect(async () => {
-      await deleteUser(sys, 'sdaflajsd')
-    }).not.toThrow()
+    await expect(deleteUser(sys, 'sdaflajsd')).rejects.toThrowError(
+      'ArangoError',
+    )
   })
 })
