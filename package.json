@@ -4,7 +4,6 @@
   "description": "tools for working with ArangoDB",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
     "dbg": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test": "jest --coverage"
   },
