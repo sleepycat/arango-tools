@@ -7,18 +7,30 @@ workarounds, which I kept telling myself I would extract into a library. This
 is that library.
 
 One of my primary painpoints is testing. Jest runs tests in parallel which
-means that each test file needs it's own database. 
+means that each test file needs it's own database.
 
 ```javascript
-let tools = await ArangoTools({ rootPass, url }).makeDatabase({
-		dbname: 'foo',
-		user,
-		password,
-		documentCollections: ['data'],
-	})
+let { makeDatabase } = await ArangoTools({ rootPass, url })
 
-let {db, {documents, edges}, drop} = tools
+let {query, truncate, drop, collections} = await makeDatabase({
+  dbname: 'foo',
+  user,
+  password,
+  documentCollections: ['widgets'],
+})
+
+await collections.widgets.save({foo: "bar"})
+
+let cursor = await query`
+FOR widget IN widgets
+  FILTER widget.foo === "bar"
+  RETURN widget
+`
+
+await cursor.all()
+// [{foo: "bar"}]
+
+await drop()
 ```
 
-The `makeDatabase` call returns a database instance, as well as a function to
-drop that database.
+The `makeDatabase` call returns a set of functions that allow you to query, truncate and drop the database you just created.
