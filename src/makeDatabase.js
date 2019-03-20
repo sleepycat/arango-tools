@@ -57,27 +57,9 @@ const makeDatabase = async (
     'document',
   )
   let edgeCols = await createCollections(newdb, edgeCollections, 'edge')
-  // var f = {
-  //   db: {
-  //     drop: () => db.drop(),
-  //     truncate: () => db.truncate(),
-  //     query: aql => db.query(aql),
-  //     collections: {
-  //       a: {
-  //         save: (doc, opts = undefined) => col.save(doc, opts),
-  //         load: (doc, opts = undefined) => col.load(doc, opts),
-  //       },
-  //       b: {
-  //         save: (doc, opts = undefined) => col.save(doc, opts),
-  //         load: (doc, opts = undefined) => col.load(doc, opts),
-  //       },
-  //     },
-  //   },
-  // }
 
-  // Return the db, collections and functions to drop and truncate it.
   return {
-		query: (strings, ...vars) => newdb.query(aql(strings, vars)),
+    query: (strings, ...vars) => newdb.query(aql(strings, ...vars)),
     collections: Object.assign({}, documentCols, edgeCols),
     drop: () => sys.dropDatabase(dbname),
     truncate: () => newdb.truncate(),

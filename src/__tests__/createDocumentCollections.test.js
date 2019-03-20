@@ -34,6 +34,27 @@ describe('ArangoTools', () => {
       expect(collections.map(c => c.name)).toContain(...testCollections)
     })
 
+    it('returns existing collections', async () => {
+      let name = generateName()
+      await sys.createDatabase(name)
+      let db = new Database()
+      db.useDatabase(name)
+      db.useBasicAuth('root', password)
+
+      let foo = db.collection('foo')
+      await foo.create()
+
+      await expect(createDocumentCollections(db, ['foo'])).resolves.toEqual(
+        expect.objectContaining({
+          foo: expect.objectContaining({
+            save: expect.any(Function),
+            import: expect.any(Function),
+          }),
+        }),
+      )
+      await sys.dropDatabase(name)
+    })
+
     it('returns an object with save and import functions', async () => {
       let name = generateName()
       await sys.createDatabase(name)

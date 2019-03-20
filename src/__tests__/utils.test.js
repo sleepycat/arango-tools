@@ -45,6 +45,21 @@ describe('ArangoTools', () => {
       )
     })
 
+    it('returns a query function that lets you query the current database', async () => {
+      let response = await ArangoTools({ rootPass, url }).makeDatabase({
+        dbname: dbNameFromFile(__filename),
+        user,
+        password,
+        documentCollections: ['foo'],
+      })
+
+      let { query, drop } = response
+
+      let result = await query`RETURN "hello world"`
+      await expect(result.all()).resolves.toEqual(['hello world'])
+      await drop()
+    })
+
     it(`doesn't fail if there is an existing database`, async () => {
       await sys.createDatabase('foo')
       let response
