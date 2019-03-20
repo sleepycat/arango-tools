@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dbg": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "lint": "eslint src/**/*",
     "test": "jest --coverage"
   },
   "author": "Mike Williamson",
