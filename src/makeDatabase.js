@@ -6,18 +6,11 @@ const { grantAccess } = require('./grantAccess')
 const makeDatabase = async (
   sys,
   url,
-  {
-    dbname,
-    user = 'root',
-    password = 'test',
-    documentCollections = [],
-    edgeCollections = [],
-  },
+  { dbname, user, password, documentCollections = [], edgeCollections = [] },
 ) => {
   if (user !== 'root') {
     try {
       await createUser(sys, { user, passwd: password })
-      await sys.createDatabase(dbname, [{ user }])
       await grantAccess(sys, dbname, user)
     } catch (e) {
       // if the error is just a duplicate name thats ok. We'll just wrap it
@@ -28,17 +21,16 @@ const makeDatabase = async (
         )
       }
     }
-  } else {
-    try {
-      await sys.createDatabase(dbname, [{ user }])
-    } catch (e) {
-      // if the error is just a duplicate name thats ok. We'll just wrap it
-      // up and return it.
-      if (e.message !== 'duplicate name') {
-        throw new Error(
-          `Tried to create database called "${dbname}" and got: ${e}`,
-        )
-      }
+  }
+  try {
+    await sys.createDatabase(dbname, [{ user }])
+  } catch (e) {
+    // if the error is just a duplicate name thats ok. We'll just wrap it
+    // up and return it.
+    if (e.message !== 'duplicate name') {
+      throw new Error(
+        `Tried to create database called "${dbname}" and got: ${e}`,
+      )
     }
   }
 
@@ -46,10 +38,8 @@ const makeDatabase = async (
   try {
     newdb = new Database({ url })
     newdb.useDatabase(dbname)
-    newdb.useBasicAuth('root', 'test')
-  } catch (e) {
-    console.log(`creating newdb failed: ${e}`)
-  }
+    newdb.useBasicAuth(user, password)
+  } catch (e) {}
 
   let documentCols = await createCollections(
     newdb,
