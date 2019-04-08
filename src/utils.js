@@ -11,13 +11,13 @@ const dbNameFromFile = filename =>
 
 module.exports.dbNameFromFile = dbNameFromFile
 
-const ArangoTools = ({ rootPass, url }) => {
+const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
   let sys = new Database({ url })
   sys.useDatabase('_system')
   sys.useBasicAuth('root', rootPass)
 
   return {
-    makeDatabase: options => makeDatabase(sys, url, options),
+    makeDatabase: options => makeDatabase(sys, rootPass, url, options),
   }
 }
 

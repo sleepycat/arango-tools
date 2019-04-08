@@ -16,7 +16,7 @@ describe('makeDatabase', () => {
   })
 
   it('creates a database and returns useful functions', async () => {
-    let response = await makeDatabase(sys, url, {
+    let response = await makeDatabase(sys, rootPass, url, {
       dbname: dbNameFromFile(__filename),
       user,
       password,
@@ -42,7 +42,7 @@ describe('makeDatabase', () => {
   })
 
   it('returns a query function that lets you query the current database', async () => {
-    let response = await makeDatabase(sys, url, {
+    let response = await makeDatabase(sys, rootPass, url, {
       dbname: dbNameFromFile(__filename),
       user,
       password,
@@ -57,20 +57,26 @@ describe('makeDatabase', () => {
   })
 
   it(`doesn't fail if there is an existing database`, async () => {
-    await sys.createDatabase('foo')
+    let randomName =
+      'test' +
+      Math.random()
+        .toString(36)
+        .slice(-5)
+
+    await sys.createDatabase(randomName)
     let response
 
     try {
-      response = await makeDatabase(sys, url, {
-        dbname: 'foo',
+      response = await makeDatabase(sys, rootPass, url, {
+        dbname: randomName,
         user,
         password,
         documentCollections: ['data'],
       })
-
-      await response.drop()
     } catch (e) {
       console.log(`drop function is broken: ${e}`)
+    } finally {
+      await response.drop()
     }
 
     expect(response).toEqual(
@@ -90,7 +96,7 @@ describe('makeDatabase', () => {
 
   it(`creates databases with non-root users`, async () => {
     let username = 'asdf'
-    let response = await makeDatabase(sys, url, {
+    let response = await makeDatabase(sys, rootPass, url, {
       dbname: 'foo',
       user: username,
       password: 'qwerty',

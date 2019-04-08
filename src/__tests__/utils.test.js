@@ -1,21 +1,36 @@
-const { Database } = require('arangojs')
 require('dotenv-safe').config()
 const { ArangoTools, dbNameFromFile, getFilenameFromPath } = require('../utils')
 
-const { DB_USER: user, DB_URL: url, DB_PASSWORD: password } = process.env
-
-let rootPass = password
-let sys
+const { DB_URL: url, DB_PASSWORD: rootPass } = process.env
 
 describe('ArangoTools', () => {
-  beforeAll(async () => {
-    sys = new Database({ url })
-    sys.useDatabase('_system')
-    sys.useBasicAuth('root', 'test')
-  })
-
   it('returns an object with a makeDatabase property', async () => {
     expect(ArangoTools({ rootPass, url })).toHaveProperty('makeDatabase')
+  })
+
+  it('succeeds in making a database', async () => {
+    let { makeDatabase } = ArangoTools({ rootPass, url })
+
+    var response = await makeDatabase({
+      dbname: 'foo',
+      user: 'mike',
+      password: 'secret',
+      documentCollections: ['foos'],
+    })
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        query: expect.any(Function),
+        drop: expect.any(Function),
+        truncate: expect.any(Function),
+        collections: expect.objectContaining({
+          foos: expect.objectContaining({
+            save: expect.any(Function),
+            import: expect.any(Function),
+          }),
+        }),
+      }),
+    )
   })
 
   describe('getFilenameFromPath', () => {

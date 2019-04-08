@@ -5,6 +5,7 @@ const { grantAccess } = require('./grantAccess')
 
 const makeDatabase = async (
   sys,
+  rootPass,
   url,
   { dbname, user, password, documentCollections = [], edgeCollections = [] },
 ) => {
@@ -23,11 +24,11 @@ const makeDatabase = async (
     }
   }
   try {
-    await sys.createDatabase(dbname, [{ user }])
+    await sys.createDatabase(dbname)
   } catch (e) {
     // if the error is just a duplicate name thats ok. We'll just wrap it
     // up and return it.
-    if (e.message !== 'duplicate name') {
+    if ((e.message !== 'duplicate name')) {
       throw new Error(
         `Tried to create database called "${dbname}" and got: ${e}`,
       )
@@ -38,8 +39,10 @@ const makeDatabase = async (
   try {
     newdb = new Database({ url })
     newdb.useDatabase(dbname)
-    newdb.useBasicAuth(user, password)
-  } catch (e) {}
+    newdb.useBasicAuth('root', rootPass)
+	} catch (e) {
+		console.log("this blew up while creating newdb")
+	}
 
   let documentCols = await createCollections(
     newdb,
@@ -48,11 +51,15 @@ const makeDatabase = async (
   )
   let edgeCols = await createCollections(newdb, edgeCollections, 'edge')
 
+  let output = new Database({ url })
+  output.useDatabase(dbname)
+  output.useBasicAuth(user, password)
+
   return {
-    query: (strings, ...vars) => newdb.query(aql(strings, ...vars)),
+    query: (strings, ...vars) => output.query(aql(strings, ...vars)),
     collections: Object.assign({}, documentCols, edgeCols),
     drop: () => sys.dropDatabase(dbname),
-    truncate: () => newdb.truncate(),
+    truncate: () => output.truncate(),
   }
 }
 
