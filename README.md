@@ -6,6 +6,12 @@ really meant much to me in my inital usage.  Over time I've been finding
 patterns in my own usage and accumulated workarounds, which I kept telling
 myself I would extract into a library. This is that library.
 
+## Installation
+
+```sh
+npm install arango-tools
+```
+
 ## Usage
 
 The `makeDatabase` call returns a set of functions that allow you to query,
@@ -15,6 +21,8 @@ Databases and collections that are asked for via `makeDatabase` will be created
 if they don't already exist.
 
 ```javascript
+const { ArangoTools } = require('arango-tools')
+
 let { makeDatabase } = await ArangoTools({ rootPass, url })
 
 let {query, truncate, drop, collections} = await makeDatabase({
@@ -42,6 +50,8 @@ Arango-tools also provides a helper function that generates a
 database name from the current file which is helpful for tests:
 
 ```
+var { dbNameFromFile } = require('arango-tools')
+
 var response = await makeDatabase({
 	dbname: dbNameFromFile(__filename),
 	user: 'mike',
