@@ -28,7 +28,7 @@ const makeDatabase = async (
   } catch (e) {
     // if the error is just a duplicate name thats ok. We'll just wrap it
     // up and return it.
-    if ((e.message !== 'duplicate name')) {
+    if (e.message !== 'duplicate name') {
       throw new Error(
         `Tried to create database called "${dbname}" and got: ${e}`,
       )
@@ -40,9 +40,9 @@ const makeDatabase = async (
     newdb = new Database({ url })
     newdb.useDatabase(dbname)
     newdb.useBasicAuth('root', rootPass)
-	} catch (e) {
-		console.log("this blew up while creating newdb")
-	}
+  } catch (e) {
+    console.log('this blew up while creating newdb')
+  }
 
   let documentCols = await createCollections(
     newdb,

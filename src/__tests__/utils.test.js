@@ -12,7 +12,48 @@ describe('ArangoTools', () => {
     let { makeDatabase } = ArangoTools({ rootPass, url })
 
     var response = await makeDatabase({
-      dbname: 'foo',
+      dbname: dbNameFromFile(__filename),
+      user: 'mike',
+      password: 'secret',
+      documentCollections: ['foos'],
+    })
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        query: expect.any(Function),
+        drop: expect.any(Function),
+        truncate: expect.any(Function),
+        collections: expect.objectContaining({
+          foos: expect.objectContaining({
+            save: expect.any(Function),
+            import: expect.any(Function),
+          }),
+        }),
+      }),
+    )
+    response.drop()
+  })
+
+  it('returns a working query function', async () => {
+    let { makeDatabase } = ArangoTools({ rootPass, url })
+
+    var { drop, query } = await makeDatabase({
+      dbname: dbNameFromFile(__filename),
+      user: 'mike',
+      password: 'secret',
+      documentCollections: ['foos'],
+    })
+    let response = await query`RETURN "hello"`
+    let result = await response.all()
+    expect(result).toEqual(['hello'])
+    drop()
+  })
+
+  it('succeeds in making a database', async () => {
+    let { makeDatabase } = ArangoTools({ rootPass, url })
+
+    var response = await makeDatabase({
+      dbname: dbNameFromFile(__filename),
       user: 'mike',
       password: 'secret',
       documentCollections: ['foos'],
