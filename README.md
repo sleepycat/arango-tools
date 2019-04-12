@@ -1,13 +1,18 @@
 # ArangoTools
 
-ArangoJS describes itself as "The official ArangoDB low-level JavaScript
-client". The "low-level" part never really meant much to me in my inital usage.
-Over time I've been finding patterns in my own usage and accumulated
-workarounds, which I kept telling myself I would extract into a library. This
-is that library.
+[ArangoJS](https://github.com/arangodb/arangojs) describes itself as "The
+official ArangoDB low-level JavaScript client". The "low-level" part never
+really meant much to me in my inital usage.  Over time I've been finding
+patterns in my own usage and accumulated workarounds, which I kept telling
+myself I would extract into a library. This is that library.
 
-One of my primary painpoints is testing. Jest runs tests in parallel which
-means that each test file needs it's own database.
+## Usage
+
+The `makeDatabase` call returns a set of functions that allow you to query,
+truncate and drop the database you just created.
+
+Databases and collections that are asked for via `makeDatabase` will be created
+if they don't already exist.
 
 ```javascript
 let { makeDatabase } = await ArangoTools({ rootPass, url })
@@ -33,4 +38,23 @@ await cursor.all()
 await drop()
 ```
 
-The `makeDatabase` call returns a set of functions that allow you to query, truncate and drop the database you just created.
+Arango-tools also provides a helper function that generates a
+database name from the current file which is helpful for tests:
+
+```
+var response = await makeDatabase({
+	dbname: dbNameFromFile(__filename),
+	user: 'mike',
+	password: 'secret',
+	documentCollections: ['foos'],
+})
+```
+## Issues
+
+This library is very focused on smoothing out the process of using Arango as a
+document store in a TDD workflow. Much of the other functionality of Arango
+will still require ArangoJS to access. TODO:
+
+* A way to create indexes
+* Should this be running migrations a-la
+  [arangomigo](https://github.com/deusdat/arangomigo)?
