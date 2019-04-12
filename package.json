@@ -26,8 +26,5 @@
     "jest": "^24.7.1",
     "prettier": "^1.16.4"
   },
-  "files": [
-    "index.js",
-    "src/utils.js"
-  ]
+  "files": ["index.js", "src/*.js", "README.md"]
 }
