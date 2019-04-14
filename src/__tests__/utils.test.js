@@ -72,6 +72,7 @@ describe('ArangoTools', () => {
         }),
       }),
     )
+    response.drop()
   })
 
   describe('getFilenameFromPath', () => {
