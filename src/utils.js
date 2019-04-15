@@ -1,5 +1,7 @@
 const { Database } = require('arangojs')
 const { makeDatabase } = require('./makeDatabase')
+const { migrateDocumentCollection } = require('./migrateDocumentCollection')
+const { migrateDatabase } = require('./migrateDatabase')
 const { parse } = require('path')
 
 const getFilenameFromPath = path => parse(path).base
@@ -11,13 +13,41 @@ const dbNameFromFile = filename =>
 
 module.exports.dbNameFromFile = dbNameFromFile
 
-const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
+const newConnection = (rootPass, url) => {
   let sys = new Database({ url })
   sys.useDatabase('_system')
   sys.useBasicAuth('root', rootPass)
+  return sys
+}
 
+const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
   return {
-    makeDatabase: options => makeDatabase(sys, rootPass, url, options),
+    migrate: async (migrations = []) => {
+      let state = {}
+      for (let migration of migrations) {
+        switch (migration.type) {
+          case 'database':
+            var dbResults = await migrateDatabase(
+              newConnection(rootPass, url),
+              migration,
+            )
+            state = Object.assign({}, state, dbResults)
+            break
+          case 'documentcollection':
+            var documentCollectionResults = await migrateDocumentCollection(
+              newConnection(rootPass, url),
+              migration,
+            )
+            state = Object.assign({}, state, {
+              collections: documentCollectionResults,
+            })
+            break
+          default:
+            console.log('Not implemented yet: ', migration)
+        }
+      }
+      return state
+    },
   }
 }
 

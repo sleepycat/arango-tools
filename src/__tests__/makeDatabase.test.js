@@ -1,7 +1,7 @@
 const { Database } = require('arangojs')
 require('dotenv-safe').config()
 const { dbNameFromFile } = require('../utils')
-const { makeDatabase } = require('../makeDatabase')
+const { makeDatabase, mkdb } = require('../makeDatabase')
 
 const { DB_USER: user, DB_URL: url, DB_PASSWORD: password } = process.env
 

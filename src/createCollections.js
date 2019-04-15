@@ -57,3 +57,4 @@ const createDocumentCollections = async (db, collections) => {
   return obj
 }
 module.exports.createDocumentCollections = createDocumentCollections
+

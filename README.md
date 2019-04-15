@@ -14,23 +14,30 @@ npm install arango-tools
 
 ## Usage
 
-The `makeDatabase` call returns a set of functions that allow you to query,
-truncate and drop the database you just created.
-
-Databases and collections that are asked for via `makeDatabase` will be created
-if they don't already exist.
+The `migrate` call takes a set of json documents describing the desired state
+of the database, and returns a set of functions that allow you act on the
+objects you just created.
+Migrations are idempotent, and create resources only when the don't exist.
 
 ```javascript
-const { ArangoTools } = require('arango-tools')
+const { ArangoTools, dbNameFromFile } = require('arango-tools')
+let name = dbNameFromFile(__filename)
 
-let { makeDatabase } = await ArangoTools({ rootPass, url })
+let { migrate } = await ArangoTools({ rootPass, url })
 
-let {query, truncate, drop, collections} = await makeDatabase({
-  dbname: 'foo',
-  user,
-  password,
-  documentCollections: ['widgets'],
-})
+let {query, truncate, drop, collections} = await migrate([
+	{
+		type: 'database',
+		databaseName: name,
+		users: [{ username: 'mike', passwd: 'sekret' }],
+	},
+	{
+		type: 'documentcollection',
+		databaseName: name,
+		name: 'widgets',
+		options: { journalsize: 10485760, waitforsync: true },
+	},
+])
 
 await collections.widgets.save({foo: "bar"})
 
@@ -46,25 +53,9 @@ await cursor.all()
 await drop()
 ```
 
-Arango-tools also provides a helper function that generates a
-database name from the current file which is helpful for tests:
-
-```
-var { dbNameFromFile } = require('arango-tools')
-
-var response = await makeDatabase({
-	dbname: dbNameFromFile(__filename),
-	user: 'mike',
-	password: 'secret',
-	documentCollections: ['foos'],
-})
-```
 ## Issues
 
-This library is very focused on smoothing out the process of using Arango as a
-document store in a TDD workflow. Much of the other functionality of Arango
-will still require ArangoJS to access. TODO:
+The current implementation is basic but works. Currently the only migrations
+that work are creating a database and a document collection. Indexes, graphs
+and edge collections will be added soon.
 
-* A way to create indexes
-* Should this be running migrations a-la
-  [arangomigo](https://github.com/deusdat/arangomigo)?
