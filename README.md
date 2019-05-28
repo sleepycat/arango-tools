@@ -37,6 +37,13 @@ let {query, truncate, drop, collections} = await migrate([
 		name: 'widgets',
 		options: { journalsize: 10485760, waitforsync: true },
 	},
+	{
+		type: 'geoindex',
+		databaseName: name,
+		collection: 'places',
+		fields: ['pts'],
+		geojson: true,
+	},
 ])
 
 await collections.widgets.save({foo: "bar"})
@@ -55,7 +62,8 @@ await drop()
 
 ## Issues
 
-The current implementation is basic but works. Currently the only migrations
-that work are creating a database and a document collection. Indexes, graphs
-and edge collections will be added soon.
+It's early!
 
+The current implementation is basic but works. Currently the only migrations
+that work are creating a database, a document collection and a GeoIndex. Other
+types of indexes as well as graphs and edge collections will be added soon.  

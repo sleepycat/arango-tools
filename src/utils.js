@@ -2,6 +2,7 @@ const { Database } = require('arangojs')
 const { makeDatabase } = require('./makeDatabase')
 const { migrateDocumentCollection } = require('./migrateDocumentCollection')
 const { migrateDatabase } = require('./migrateDatabase')
+const { migrateGeoIndex } = require('./migrateGeoIndex')
 const { parse } = require('path')
 
 const getFilenameFromPath = path => parse(path).base
@@ -41,6 +42,12 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
             state = Object.assign({}, state, {
               collections: documentCollectionResults,
             })
+            break
+          case 'geoindex':
+            await migrateGeoIndex(
+              newConnection(rootPass, url),
+              migration,
+            )
             break
           default:
             console.log('Not implemented yet: ', migration)
