@@ -3,7 +3,7 @@ const { Database } = require('arangojs')
 const { dbNameFromFile } = require('../utils')
 const { migrateGeoIndex } = require('../migrateGeoIndex')
 
-const { DB_PASSWORD: rootPass } = process.env
+const { ARANGOTOOLS_DB_PASSWORD: rootPass } = process.env
 
 describe('migrateGeoIndex', () => {
   describe('with an existing collection', () => {

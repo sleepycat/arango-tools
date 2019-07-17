@@ -3,7 +3,7 @@ const { Database } = require('arangojs')
 const { migrateDatabase } = require('../migrateDatabase')
 const { dbNameFromFile } = require('../utils')
 
-const { DB_PASSWORD: rootPass } = process.env
+const { ARANGOTOOLS_DB_PASSWORD: rootPass } = process.env
 
 describe('migrateDatabase', () => {
   describe('given a migration', () => {
@@ -43,7 +43,7 @@ describe('migrateDatabase', () => {
     })
 
     connection.useDatabase('_system')
-		await connection.dropDatabase(dbname)
+    await connection.dropDatabase(dbname)
 
     expect(response).toEqual(
       expect.objectContaining({

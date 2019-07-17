@@ -3,7 +3,7 @@ const { Database } = require('arangojs')
 require('dotenv-safe').config()
 const { createDocumentCollections } = require('../createCollections')
 
-const { DB_URL: url, DB_PASSWORD: password } = process.env
+const { ARANGOTOOLS_DB_PASSWORD: password } = process.env
 
 const generateName = () =>
   parse(__filename).base.replace(/\./g, '_') + '_' + Date.now()
@@ -13,7 +13,7 @@ let testCollections = ['a', 'b']
 
 describe('ArangoTools', () => {
   beforeEach(async () => {
-    sys = new Database({ url })
+    sys = new Database()
     sys.useDatabase('_system')
     sys.useBasicAuth('root', password)
   })

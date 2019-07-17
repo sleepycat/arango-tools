@@ -3,7 +3,10 @@ const { Database } = require('arangojs')
 const { migrateDocumentCollection } = require('../migrateDocumentCollection')
 const { dbNameFromFile } = require('../utils')
 
-const { DB_URL: url, DB_PASSWORD: rootPass } = process.env
+const {
+  ARANGOTOOLS_DB_URL: url,
+  ARANGOTOOLS_DB_PASSWORD: rootPass,
+} = process.env
 
 let dbname = dbNameFromFile(__filename)
 

@@ -3,10 +3,14 @@ require('dotenv-safe').config()
 const { dbNameFromFile } = require('../utils')
 const { makeDatabase } = require('../makeDatabase')
 
-const { DB_USER: user, DB_URL: url, DB_PASSWORD: password } = process.env
+const {
+  ARANGOTOOLS_DB_URL: url,
+  ARANGOTOOLS_DB_PASSWORD: password,
+} = process.env
 
 let rootPass = password
 let sys
+let user = 'root'
 
 describe('makeDatabase', () => {
   beforeAll(async () => {

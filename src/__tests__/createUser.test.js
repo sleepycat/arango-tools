@@ -4,7 +4,10 @@ require('dotenv-safe').config()
 const { createUser } = require('../createUser')
 const { deleteUser } = require('../deleteUser')
 
-const { DB_URL: url, DB_PASSWORD: password } = process.env
+const {
+  ARANGOTOOLS_DB_URL: url,
+  ARANGOTOOLS_DB_PASSWORD: password,
+} = process.env
 
 const generateName = () =>
   parse(__filename).base.replace(/\./g, '_') + '_' + Date.now()

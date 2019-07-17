@@ -2,7 +2,10 @@ require('dotenv-safe').config()
 const { Database } = require('arangojs')
 const { ArangoTools, dbNameFromFile } = require('../utils')
 
-const { DB_URL: url, DB_PASSWORD: rootPass } = process.env
+const {
+  ARANGOTOOLS_DB_URL: url,
+  ARANGOTOOLS_DB_PASSWORD: rootPass,
+} = process.env
 
 describe('migrate', () => {
   it('returns a working query function', async () => {

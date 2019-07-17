@@ -2,7 +2,10 @@ const { Database } = require('arangojs')
 require('dotenv-safe').config()
 const { deleteUser } = require('../deleteUser')
 
-const { DB_URL: url, DB_PASSWORD: password } = process.env
+const {
+  ARANGOTOOLS_DB_URL: url,
+  ARANGOTOOLS_DB_PASSWORD: password,
+} = process.env
 
 let sys
 
