@@ -1,5 +1,4 @@
 const { Database } = require('arangojs')
-const { makeDatabase } = require('./makeDatabase')
 const { migrateDocumentCollection } = require('./migrateDocumentCollection')
 const { migrateDatabase } = require('./migrateDatabase')
 const { migrateGeoIndex } = require('./migrateGeoIndex')
