@@ -1,6 +1,7 @@
 const { Database, aql } = require('arangojs')
 
 const migrateDatabase = async (connection, migration) => {
+  // TODO: check migration schema
   try {
     await connection.createDatabase(migration.databaseName, migration.users)
   } catch (e) {
@@ -11,10 +12,13 @@ const migrateDatabase = async (connection, migration) => {
     }
   }
 
+  // TODO: need to rework things in a few places to
+  // make this work for multiple users
   let [user] = migration.users
   let output = new Database({ url: migration.url })
   output.useDatabase(migration.databaseName)
-  await output.useBasicAuth(user.username, user.passwd)
+  await output.login(user.username, user.passwd)
+
   return {
     query: (strings, ...vars) => output.query(aql(strings, ...vars)),
     drop: () => {

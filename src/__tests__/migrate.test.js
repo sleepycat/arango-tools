@@ -16,12 +16,14 @@ describe('migrate', () => {
     let { drop, query } = await migrate([
       {
         type: 'database',
+				url,
         databaseName: name,
-        users: [{ username: 'mike', passwd: 'mikelovescaro' }],
+        users: [{ username: 'mike', passwd: 'secret' }],
       },
       {
         type: 'documentcollection',
         databaseName: name,
+				url,
         name: 'places',
         options: { journalsize: 10485760, waitforsync: true },
       },
@@ -46,7 +48,7 @@ describe('migrate', () => {
       {
         type: 'database',
         databaseName: name,
-        users: [{ username: 'mike', passwd: 'mikelovescaro' }],
+        users: [{ username: 'mike', passwd: 'secret' }],
       },
       {
         type: 'documentcollection',

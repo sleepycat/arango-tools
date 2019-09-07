@@ -25,6 +25,8 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
     migrate: async (migrations = []) => {
       let state = {}
       for (let migration of migrations) {
+        // Add the url to each migration.
+        migration.url = url
         switch (migration.type) {
           case 'database':
             var dbResults = await migrateDatabase(
@@ -43,10 +45,7 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
             })
             break
           case 'geoindex':
-            await migrateGeoIndex(
-              newConnection(rootPass, url),
-              migration,
-            )
+            await migrateGeoIndex(newConnection(rootPass, url), migration)
             break
           default:
             console.log('Not implemented yet: ', migration)
