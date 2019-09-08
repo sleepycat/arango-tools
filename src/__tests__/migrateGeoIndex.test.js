@@ -36,6 +36,8 @@ describe('migrateGeoIndex', () => {
 
       expect(error).toEqual(false)
       expect(geoJson).toEqual(false)
+      sys.useDatabase('_system')
+      await sys.dropDatabase(dbname)
     })
 
     it('creates a geo index with geojson', async () => {
@@ -67,6 +69,9 @@ describe('migrateGeoIndex', () => {
       const index = await migrateGeoIndex(sys, migration)
 
       expect(index.geoJson).toEqual(true)
+
+      sys.useDatabase('_system')
+      await sys.dropDatabase(dbname)
     })
   })
 
@@ -101,6 +106,9 @@ describe('migrateGeoIndex', () => {
       await expect(migrateGeoIndex(sys, migration)).rejects.toThrowError(
         /Can't add a geoindex to a collection that doesn't exist/,
       )
+
+      sys.useDatabase('_system')
+      await sys.dropDatabase(dbname)
     })
   })
 })
