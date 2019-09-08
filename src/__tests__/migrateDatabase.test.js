@@ -11,8 +11,8 @@ const {
 describe('migrateDatabase', () => {
   describe('given a migration', () => {
     it('creates a database for a non-root user', async () => {
-      let dbname = dbNameFromFile(__filename)
-      let connection = new Database({ url })
+      const dbname = dbNameFromFile(__filename)
+      const connection = new Database({ url })
       await connection.login('root', rootPass)
       connection.useDatabase('_system')
 
@@ -23,19 +23,19 @@ describe('migrateDatabase', () => {
         users: [{ username: 'mike', passwd: 'secret' }],
       })
 
-      let userConnection = new Database({ url })
+      const userConnection = new Database({ url })
       userConnection.useDatabase(dbname)
       await userConnection.login('mike', 'secret')
 
-      let databases = await userConnection.listUserDatabases()
+      const databases = await userConnection.listUserDatabases()
 
       expect(databases).toContain(dbname)
       await connection.dropDatabase(dbname)
     })
 
     it('creates a database for a root user', async () => {
-      let dbname = dbNameFromFile(__filename)
-      let connection = new Database({ url })
+      const dbname = dbNameFromFile(__filename)
+      const connection = new Database({ url })
       await connection.login('root', rootPass)
       connection.useDatabase('_system')
 
@@ -46,11 +46,11 @@ describe('migrateDatabase', () => {
         users: [{ username: 'root', passwd: rootPass }],
       })
 
-      let userConnection = new Database({ url })
+      const userConnection = new Database({ url })
       userConnection.useDatabase(dbname)
       await userConnection.login('root', rootPass)
 
-      let databases = await userConnection.listUserDatabases()
+      const databases = await userConnection.listUserDatabases()
 
       expect(databases).toContain(dbname)
 
@@ -59,12 +59,12 @@ describe('migrateDatabase', () => {
   })
 
   it('returns an object with query, truncate and drop functions', async () => {
-    let dbname = 'a' + dbNameFromFile(__filename)
-    let connection = new Database({ url })
+    const dbname = 'a' + dbNameFromFile(__filename)
+    const connection = new Database({ url })
     connection.useDatabase('_system')
     connection.useBasicAuth('root', rootPass)
 
-    let response = await migrateDatabase(connection, {
+    const response = await migrateDatabase(connection, {
       type: 'database',
       url,
       databaseName: dbname,

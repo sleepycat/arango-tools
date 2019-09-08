@@ -11,7 +11,7 @@ const {
 const generateName = () =>
   parse(__filename).base.replace(/\./g, '_') + '_' + Date.now()
 
-let rootPass = password
+const rootPass = password
 let sys
 
 describe('grantAccess', () => {
@@ -22,18 +22,18 @@ describe('grantAccess', () => {
   })
 
   it('gives an ArangoDB user permissions on a database', async () => {
-    let name = generateName()
+    const name = generateName()
     await sys.createDatabase(name)
-    let db = new Database()
+    const db = new Database()
     db.useDatabase(name)
     db.useBasicAuth('root', password)
 
-    let { user } = await createUser(sys, {
+    const { user } = await createUser(sys, {
       user: 'mike',
       passwd: 'soopersekret',
     })
 
-    let permission = await grantAccess(sys, name, user)
+    const permission = await grantAccess(sys, name, user)
     sys.dropDatabase(name)
     expect(permission[name]).toEqual('rw')
   })

@@ -12,7 +12,7 @@ const generateName = () =>
   parse(__filename).base.replace(/\./g, '_') + '_' + Date.now()
 
 let sys, db
-let testCollections = ['a', 'b']
+const testCollections = ['a', 'b']
 
 describe('ArangoTools', () => {
   beforeEach(async () => {
@@ -25,13 +25,13 @@ describe('ArangoTools', () => {
 
   describe('createEdgeCollections', () => {
     it('returns and object with save and import functions', async () => {
-      let name = generateName()
+      const name = generateName()
       await sys.createDatabase(name)
-      let db = new Database()
+      const db = new Database()
       db.useDatabase(name)
       db.useBasicAuth('root', password)
 
-      let collectionsObject = await createEdgeCollections(db, testCollections)
+      const collectionsObject = await createEdgeCollections(db, testCollections)
 
       sys.dropDatabase(name)
 
@@ -50,13 +50,13 @@ describe('ArangoTools', () => {
     })
 
     it('returns existing collections', async () => {
-      let name = generateName()
+      const name = generateName()
       await sys.createDatabase(name)
-      let db = new Database()
+      const db = new Database()
       db.useDatabase(name)
       db.useBasicAuth('root', password)
 
-      let foo = db.collection('foo')
+      const foo = db.collection('foo')
       await foo.create()
 
       await expect(createEdgeCollections(db, ['foo'])).resolves.toEqual(
@@ -71,15 +71,15 @@ describe('ArangoTools', () => {
     })
 
     it('actually creates collections in the database', async () => {
-      let name = generateName()
+      const name = generateName()
       await sys.createDatabase(name)
-      let db = new Database()
+      const db = new Database()
       db.useDatabase(name)
       db.useBasicAuth('root', password)
 
       await createEdgeCollections(db, testCollections)
 
-      let collections = await db.collections()
+      const collections = await db.collections()
 
       sys.dropDatabase(name)
 

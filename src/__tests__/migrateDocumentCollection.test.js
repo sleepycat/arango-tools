@@ -8,7 +8,7 @@ const {
   ARANGOTOOLS_DB_PASSWORD: rootPass,
 } = process.env
 
-let dbname = dbNameFromFile(__filename)
+const dbname = dbNameFromFile(__filename)
 
 let connection
 
@@ -35,15 +35,15 @@ describe('migrateDocumentCollection', () => {
       })
 
       connection.useDatabase(dbname)
-      let collections = await connection.collections()
-      let collectionNames = collections.map(c => c.name)
+      const collections = await connection.collections()
+      const collectionNames = collections.map(c => c.name)
 
       expect(collectionNames).toContain('places')
     })
   })
 
   it('returns an object with save and import functions', async () => {
-    let response = await migrateDocumentCollection(connection, {
+    const response = await migrateDocumentCollection(connection, {
       type: 'documentcollection',
       databaseName: dbname,
       name: 'places',

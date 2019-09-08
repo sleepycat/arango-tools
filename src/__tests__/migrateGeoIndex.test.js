@@ -11,21 +11,21 @@ describe('migrateGeoIndex', () => {
       const collectionName = 'places'
 
       // set up a database and collection
-      let sys = new Database()
+      const sys = new Database()
       sys.useDatabase('_system')
       sys.useBasicAuth('root', rootPass)
 
-      let dbname = dbNameFromFile(__filename)
+      const dbname = dbNameFromFile(__filename)
       await sys.createDatabase(dbname)
-      let db = new Database()
+      const db = new Database()
       db.useDatabase(dbname)
       db.useBasicAuth('root', rootPass)
 
-      let col = db.collection(collectionName)
+      const col = db.collection(collectionName)
       await col.create()
 
       // Our migration to test
-      let migration = {
+      const migration = {
         type: 'geoindex',
         databaseName: dbname,
         collection: collectionName,
@@ -44,21 +44,21 @@ describe('migrateGeoIndex', () => {
       const collectionName = 'places'
 
       // set up a database and collection
-      let sys = new Database()
+      const sys = new Database()
       sys.useDatabase('_system')
       sys.useBasicAuth('root', rootPass)
 
-      let dbname = dbNameFromFile(__filename)
+      const dbname = dbNameFromFile(__filename)
       await sys.createDatabase(dbname)
-      let db = new Database()
+      const db = new Database()
       db.useDatabase(dbname)
       db.useBasicAuth('root', rootPass)
 
-      let col = db.collection(collectionName)
+      const col = db.collection(collectionName)
       await col.create()
 
       // Our migration to test
-      let migration = {
+      const migration = {
         type: 'geoindex',
         databaseName: dbname,
         collection: collectionName,
@@ -80,13 +80,13 @@ describe('migrateGeoIndex', () => {
       const collectionName = 'places'
 
       // set up a database and collection
-      let sys = new Database()
+      const sys = new Database()
       sys.useDatabase('_system')
       sys.useBasicAuth('root', rootPass)
 
-      let dbname = dbNameFromFile(__filename)
+      const dbname = dbNameFromFile(__filename)
       await sys.createDatabase(dbname)
-      let db = new Database()
+      const db = new Database()
       db.useDatabase(dbname)
       db.useBasicAuth('root', rootPass)
 
@@ -95,7 +95,7 @@ describe('migrateGeoIndex', () => {
       // await col.create()
 
       // Our migration to test
-      let migration = {
+      const migration = {
         type: 'geoindex',
         databaseName: dbname,
         collection: collectionName,

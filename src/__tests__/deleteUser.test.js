@@ -9,7 +9,7 @@ const {
 
 let sys
 
-let randomName = `testUser${Math.random()
+const randomName = `testUser${Math.random()
   .toString(36)
   .substring(7)}`
 
@@ -31,8 +31,8 @@ describe('createUser', () => {
     await deleteUser(sys, randomName)
 
     // get all users
-    let { body } = await sys.route('/_api/user').get()
-    let names = body.result.filter(u => u.user === randomName)
+    const { body } = await sys.route('/_api/user').get()
+    const names = body.result.filter(u => u.user === randomName)
 
     expect(names).not.toContain(randomName)
   })

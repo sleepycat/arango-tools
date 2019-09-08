@@ -9,11 +9,11 @@ const {
 
 describe('migrate', () => {
   it('returns a working query function', async () => {
-    let { migrate } = ArangoTools({ rootPass, url })
+    const { migrate } = ArangoTools({ rootPass, url })
 
-    let name = dbNameFromFile(__filename)
+    const name = dbNameFromFile(__filename)
 
-    let { drop, query } = await migrate([
+    const { drop, query } = await migrate([
       {
         type: 'database',
 				url,
@@ -29,22 +29,22 @@ describe('migrate', () => {
       },
     ])
 
-    let response = await query`RETURN "hello"`
-    let result = await response.all()
+    const response = await query`RETURN "hello"`
+    const result = await response.all()
     expect(result).toEqual(['hello'])
     drop()
   })
 
   it('sets initial state of the database based on JSON descriptions', async () => {
-    let sys = new Database()
+    const sys = new Database()
     sys.useDatabase('_system')
     sys.useBasicAuth('root', rootPass)
 
-    let { migrate } = ArangoTools({ rootPass, url })
+    const { migrate } = ArangoTools({ rootPass, url })
 
-    let name = dbNameFromFile(__filename)
+    const name = dbNameFromFile(__filename)
 
-    let response = await migrate([
+    const response = await migrate([
       {
         type: 'database',
         databaseName: name,

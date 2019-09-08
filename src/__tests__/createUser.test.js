@@ -12,7 +12,7 @@ const {
 const generateName = () =>
   parse(__filename).base.replace(/\./g, '_') + '_' + Date.now()
 
-let rootPass = password
+const rootPass = password
 let sys
 
 describe('createUser', () => {
@@ -23,16 +23,16 @@ describe('createUser', () => {
   })
 
   it('creates a user in ArangoDB', async () => {
-    let name = generateName()
+    const name = generateName()
     await sys.createDatabase(name)
-    let db = new Database()
+    const db = new Database()
     db.useDatabase(name)
     db.useBasicAuth('root', password)
 
-    let randomName = `testUser${Math.random()
+    const randomName = `testUser${Math.random()
       .toString(36)
       .substring(7)}`
-    let user = await createUser(db, {
+    const user = await createUser(db, {
       user: randomName,
       passwd: 'soopersekret',
     })
