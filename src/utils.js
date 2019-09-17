@@ -1,5 +1,7 @@
+const assign = require('assign-deep')
 const { Database } = require('arangojs')
 const { migrateDocumentCollection } = require('./migrateDocumentCollection')
+const { migrateEdgeCollection } = require('./migrateEdgeCollection')
 const { migrateDatabase } = require('./migrateDatabase')
 const { migrateGeoIndex } = require('./migrateGeoIndex')
 const { parse } = require('path')
@@ -14,7 +16,7 @@ const dbNameFromFile = filename =>
 module.exports.dbNameFromFile = dbNameFromFile
 
 const newConnection = (rootPass, url) => {
-  let sys = new Database({ url })
+  const sys = new Database({ url })
   sys.useDatabase('_system')
   sys.useBasicAuth('root', rootPass)
   return sys
@@ -24,7 +26,7 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
   return {
     migrate: async (migrations = []) => {
       let state = {}
-      for (let migration of migrations) {
+      for (const migration of migrations) {
         // Add the url to each migration.
         migration.url = url
         switch (migration.type) {
@@ -33,15 +35,24 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
               newConnection(rootPass, url),
               migration,
             )
-            state = Object.assign({}, state, dbResults)
+            state = assign({}, state, dbResults)
             break
           case 'documentcollection':
             var documentCollectionResults = await migrateDocumentCollection(
               newConnection(rootPass, url),
               migration,
             )
-            state = Object.assign({}, state, {
+            state = assign({}, state, {
               collections: documentCollectionResults,
+            })
+            break
+          case 'edgecollection':
+            var edgeCollectionResults = await migrateEdgeCollection(
+              newConnection(rootPass, url),
+              migration,
+            )
+            state = assign({}, state, {
+              collections: edgeCollectionResults,
             })
             break
           case 'geoindex':

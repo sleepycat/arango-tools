@@ -57,20 +57,16 @@ describe('migrate', () => {
         options: { journalsize: 10485760, waitforsync: true },
       },
       {
+        type: 'edgecollection',
+        databaseName: name,
+        name: 'edges',
+      },
+      {
         type: 'geoindex',
         databaseName: name,
         collection: 'places',
         fields: ['pts'],
         geojson: true,
-      },
-      {
-        type: 'graph',
-        databaseName: name,
-        action: 'create',
-        name: 'places-graph',
-        edgedefinitions: [
-          { collection: 'relationships', from: ['places'], to: ['places'] },
-        ],
       },
     ])
 
