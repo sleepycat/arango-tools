@@ -1,6 +1,6 @@
 {
   "name": "arango-tools",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "tools for working with ArangoDB",
   "main": "index.js",
   "scripts": {
@@ -27,6 +27,12 @@
     "jest": "^24.9.0",
     "prettier": "^1.19.1"
   },
-  "files": ["index.js", "src/*.js", "README.md"],
-  "jest": { "verbose": true }
+  "files": [
+    "index.js",
+    "src/*.js",
+    "README.md"
+  ],
+  "jest": {
+    "verbose": true
+  }
 }
