@@ -7,15 +7,15 @@ const migrateDatabase = async (connection, migration) => {
   } catch (e) {
     // if the error is just a duplicate name thats ok. We'll just wrap it
     // up and return it.
-    if (e.message !== 'duplicate name') {
+    if (!e.message.match(/duplicate/)) {
       throw new Error(`${migration.databaseName}: ${e.message}`)
     }
   }
 
   // TODO: need to rework things in a few places to
   // make this work for multiple users
-  let [user] = migration.users
-  let output = new Database({ url: migration.url })
+  const [user] = migration.users
+  const output = new Database({ url: migration.url })
   output.useDatabase(migration.databaseName)
   await output.login(user.username, user.passwd)
 
