@@ -87,7 +87,9 @@ describe('migrateDatabase()', () => {
           to: databaseName,
         })
 
-        await expect(rootConnection.listUserDatabases()).resolves.toContain(databaseName)
+        await expect(rootConnection.listUserDatabases()).resolves.toContain(
+          databaseName,
+        )
       })
     })
 
@@ -136,6 +138,27 @@ describe('migrateDatabase()', () => {
             drop: expect.any(Function),
           }),
         )
+
+        connection.useDatabase('_system')
+        await connection.dropDatabase(dbname)
+      })
+
+      it('returns a query function that has the count option enabled', async () => {
+        const dbname = 'a' + dbNameFromFile(__filename)
+        const connection = new Database({ url })
+        connection.useDatabase('_system')
+        connection.useBasicAuth('root', rootPass)
+
+        const response = await migrateDatabase(connection, {
+          type: 'database',
+          url,
+          databaseName: dbname,
+          users: [{ username: 'mike', passwd: 'secret' }],
+        })
+
+        const cursor = await response.query`FOR i IN [1,2,3] RETURN i`
+
+        expect(cursor).toMatchObject({ count: 3 })
 
         connection.useDatabase('_system')
         await connection.dropDatabase(dbname)
