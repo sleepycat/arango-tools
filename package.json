@@ -11,20 +11,20 @@
   "author": "Mike Williamson",
   "license": "MIT",
   "dependencies": {
-    "arangojs": "^6.14.0",
+    "arangojs": "^6.14.1",
     "assign-deep": "^1.0.1"
   },
   "devDependencies": {
     "dotenv-safe": "^8.2.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.1",
+    "eslint": "^7.5.0",
+    "eslint-config-prettier": "^6.11.0",
     "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-jest": "^23.8.2",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.18.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "jest": "^25.2.7",
+    "jest": "^26.1.0",
     "prettier": "^1.19.1"
   },
   "files": [
