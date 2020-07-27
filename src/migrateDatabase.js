@@ -20,7 +20,8 @@ const migrateDatabase = async (connection, migration) => {
   await output.login(user.username, user.passwd)
 
   return {
-    query: (strings, ...vars) => output.query(aql(strings, ...vars)),
+    query: (strings, ...vars) =>
+      output.query(aql(strings, ...vars), { count: true }),
     drop: () => {
       connection.dropDatabase(migration.databaseName)
     },
