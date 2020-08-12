@@ -25,7 +25,7 @@ let name = dbNameFromFile(__filename)
 
 let { migrate } = await ArangoTools({ rootPass, url })
 
-let {query, truncate, drop, collections} = await migrate([
+let {query, truncate, drop, transaction, collections} = await migrate([
 	{
 		type: 'database',
 		databaseName: name,
