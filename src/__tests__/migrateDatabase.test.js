@@ -136,6 +136,39 @@ describe('migrateDatabase()', () => {
             query: expect.any(Function),
             truncate: expect.any(Function),
             drop: expect.any(Function),
+            transaction: expect.any(Function),
+          }),
+        )
+
+        connection.useDatabase('_system')
+        await connection.dropDatabase(dbname)
+      })
+
+      it('returns a transaction function that returns a transaction object', async () => {
+        const dbname = 'a' + dbNameFromFile(__filename)
+        const connection = new Database({ url })
+        connection.useDatabase('_system')
+        connection.useBasicAuth('root', rootPass)
+
+        const response = await migrateDatabase(connection, {
+          type: 'database',
+          url,
+          databaseName: dbname,
+          users: [{ username: 'mike', passwd: 'secret' }],
+        })
+
+        connection.useDatabase(dbname)
+
+        const collection = connection.collection('potatoes')
+        await collection.create()
+
+        expect(
+          response.transaction({ read: ['potatoes'] }),
+        ).resolves.toMatchObject(
+          expect.objectContaining({
+            id: expect.any(String),
+            run: expect.any(Function),
+            isArangoTransaction: true,
           }),
         )
 

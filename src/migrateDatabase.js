@@ -26,6 +26,7 @@ const migrateDatabase = async (connection, migration) => {
       connection.dropDatabase(migration.databaseName)
     },
     truncate: () => output.truncate(),
+    transaction: collections => output.beginTransaction(collections),
   }
 }
 
