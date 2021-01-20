@@ -5,7 +5,7 @@ const migrateGeoIndex = async (connection, migration) => {
     throw new Error(`${migration.type}: ${e.message}.`)
   }
 
-  let collection = connection.collection(migration.collection)
+  const collection = connection.collection(migration.collection)
   const exists = await collection.exists()
 
   if (!exists) {
@@ -14,11 +14,10 @@ const migrateGeoIndex = async (connection, migration) => {
 
   let index
   try {
-    if (migration.geojson) {
-      index = await collection.createGeoIndex(migration.fields, {
-        geoJson: true,
-      })
-    } else index = await collection.createGeoIndex(migration.fields)
+    index = await collection.ensureIndex({
+      ...migration.options,
+      type: 'geo',
+    })
   } catch (e) {
     throw new Error(`${migration.type}: ${e.message}`)
   }

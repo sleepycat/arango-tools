@@ -31,9 +31,14 @@ describe('ArangoTools', () => {
       db.useDatabase(name)
       db.useBasicAuth('root', password)
 
-      const collectionsObject = await createEdgeCollections(db, testCollections)
-
-      sys.dropDatabase(name)
+      let collectionsObject
+      try {
+        collectionsObject = await createEdgeCollections(db, testCollections)
+      } catch (e) {
+        console.log(e.message)
+      } finally {
+        sys.dropDatabase(name)
+      }
 
       expect(collectionsObject).toEqual(
         expect.objectContaining({
@@ -77,13 +82,15 @@ describe('ArangoTools', () => {
       db.useDatabase(name)
       db.useBasicAuth('root', password)
 
-      await createEdgeCollections(db, testCollections)
-
-      const collections = await db.collections()
-
-      sys.dropDatabase(name)
-
-      expect(collections.map(c => c.name)).toContain(...testCollections)
+      try {
+        await createEdgeCollections(db, testCollections)
+        const collections = await db.collections()
+        expect(collections.map((c) => c.name)).toContain(...testCollections)
+      } catch (e) {
+        console.log(e.message)
+      } finally {
+        sys.dropDatabase(name)
+      }
     })
   })
 })

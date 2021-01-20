@@ -145,35 +145,36 @@ describe('migrateDatabase()', () => {
       })
 
       it('returns a transaction function that returns a transaction object', async () => {
-        const dbname = 'a' + dbNameFromFile(__filename)
+        const dbname = 'transaction_' + dbNameFromFile(__filename)
         const connection = new Database({ url })
         connection.useDatabase('_system')
         connection.useBasicAuth('root', rootPass)
 
-        const response = await migrateDatabase(connection, {
-          type: 'database',
-          url,
-          databaseName: dbname,
-          users: [{ username: 'mike', passwd: 'secret' }],
-        })
+        try {
+          const response = await migrateDatabase(connection, {
+            type: 'database',
+            url,
+            databaseName: dbname,
+            users: [{ username: 'mike', passwd: 'secret' }],
+          })
 
-        connection.useDatabase(dbname)
+          connection.useDatabase(dbname)
 
-        const collection = connection.collection('potatoes')
-        await collection.create()
+          const collection = connection.collection('potatoes')
+          await collection.create()
 
-        expect(
-          response.transaction({ read: ['potatoes'] }),
-        ).resolves.toMatchObject(
-          expect.objectContaining({
-            id: expect.any(String),
-            run: expect.any(Function),
-            isArangoTransaction: true,
-          }),
-        )
-
-        connection.useDatabase('_system')
-        await connection.dropDatabase(dbname)
+          expect(
+            response.transaction({ read: ['potatoes'] }),
+          ).resolves.toMatchObject(
+            expect.objectContaining({
+              id: expect.any(String),
+              isArangoTransaction: true,
+            }),
+          )
+        } finally {
+          connection.useDatabase('_system')
+          await connection.dropDatabase(dbname)
+        }
       })
 
       it('returns a query function that has the count option enabled', async () => {
