@@ -8,17 +8,18 @@ const createCollections = (db, collections, collectionType = 'document') => {
 module.exports.createCollections = createCollections
 
 const createEdgeCollections = async (db, collections) => {
-  let existingCollections = await db.collections()
-  let existingCollectionNames = existingCollections.map(c => c.name)
-  let obj = {}
-  for (let c of collections) {
-    let col = db.edgeCollection(c)
+  const existingCollections = await db.collections()
+  const existingCollectionNames = existingCollections.map((c) => c.name)
+
+  const obj = {}
+  for (const c of collections) {
+    let col
     if (!existingCollectionNames.includes(c)) {
       try {
-        await col.create()
+        col = await db.createEdgeCollection(c)
       } catch (e) {
         throw new Error(
-          `Creating edge collection ${c} failed blew up: ${e.message}`,
+          `Creating edge collection "${c}" failed blew up: ${e.message}`,
         )
       }
     }
@@ -33,15 +34,15 @@ const createEdgeCollections = async (db, collections) => {
 module.exports.createEdgeCollections = createEdgeCollections
 
 const createDocumentCollections = async (db, collections) => {
-  let existingCollections = await db.collections()
-  let existingCollectionNames = existingCollections.map(c => c.name)
+  const existingCollections = await db.collections()
+  const existingCollectionNames = existingCollections.map((c) => c.name)
 
-  let obj = {}
-  for (let c of collections) {
-    let col = db.collection(c)
+  const obj = {}
+  for (const c of collections) {
+    let col
     if (!existingCollectionNames.includes(c)) {
       try {
-        await col.create()
+        col = await db.createEdgeCollection(c)
       } catch (e) {
         throw new Error(
           `Creating document collection ${c} failed blew up: ${e.message}`,
@@ -57,4 +58,3 @@ const createDocumentCollections = async (db, collections) => {
   return obj
 }
 module.exports.createDocumentCollections = createDocumentCollections
-

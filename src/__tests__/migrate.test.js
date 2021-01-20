@@ -16,14 +16,14 @@ describe('migrate', () => {
     const { drop, query } = await migrate([
       {
         type: 'database',
-				url,
+        url,
         databaseName: name,
         users: [{ username: 'mike', passwd: 'secret' }],
       },
       {
         type: 'documentcollection',
         databaseName: name,
-				url,
+        url,
         name: 'places',
         options: { journalsize: 10485760, waitforsync: true },
       },
@@ -65,8 +65,10 @@ describe('migrate', () => {
         type: 'geoindex',
         databaseName: name,
         collection: 'places',
-        fields: ['pts'],
-        geojson: true,
+        options: {
+          fields: ['pts'],
+          geoJson: true,
+        },
       },
     ])
 

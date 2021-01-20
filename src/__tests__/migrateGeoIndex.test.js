@@ -29,15 +29,20 @@ describe('migrateGeoIndex', () => {
         type: 'geoindex',
         databaseName: dbname,
         collection: collectionName,
-        fields: ['pts'],
+        options: {
+          fields: ['pts'],
+        },
       }
 
-      const { error, geoJson } = await migrateGeoIndex(sys, migration)
+      try {
+        const { error, geoJson } = await migrateGeoIndex(sys, migration)
 
-      expect(error).toEqual(false)
-      expect(geoJson).toEqual(false)
-      sys.useDatabase('_system')
-      await sys.dropDatabase(dbname)
+        expect(error).toEqual(false)
+        expect(geoJson).toEqual(false)
+      } finally {
+        sys.useDatabase('_system')
+        await sys.dropDatabase(dbname)
+      }
     })
 
     it('creates a geo index with geojson', async () => {
@@ -62,16 +67,19 @@ describe('migrateGeoIndex', () => {
         type: 'geoindex',
         databaseName: dbname,
         collection: collectionName,
-        fields: ['pts'],
-        geojson: true,
+        options: {
+          fields: ['pts'],
+          geoJson: true,
+        },
       }
 
-      const index = await migrateGeoIndex(sys, migration)
-
-      expect(index.geoJson).toEqual(true)
-
-      sys.useDatabase('_system')
-      await sys.dropDatabase(dbname)
+      try {
+        const index = await migrateGeoIndex(sys, migration)
+        expect(index.geoJson).toEqual(true)
+      } finally {
+        sys.useDatabase('_system')
+        await sys.dropDatabase(dbname)
+      }
     })
   })
 
@@ -99,16 +107,20 @@ describe('migrateGeoIndex', () => {
         type: 'geoindex',
         databaseName: dbname,
         collection: collectionName,
-        fields: ['pts'],
-        geojson: true,
+        options: {
+          fields: ['pts'],
+          geoJson: true,
+        },
       }
 
-      await expect(migrateGeoIndex(sys, migration)).rejects.toThrowError(
-        /Can't add a geoindex to a collection that doesn't exist/,
-      )
-
-      sys.useDatabase('_system')
-      await sys.dropDatabase(dbname)
+      try {
+        await expect(migrateGeoIndex(sys, migration)).rejects.toThrowError(
+          /Can't add a geoindex to a collection that doesn't exist/,
+        )
+      } finally {
+        sys.useDatabase('_system')
+        await sys.dropDatabase(dbname)
+      }
     })
   })
 })

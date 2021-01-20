@@ -6,16 +6,15 @@ const migrateEdgeCollection = async (connection, migration) => {
   }
 
   const existingCollections = await connection.collections()
-  const existingCollectionNames = existingCollections.map(c => c.name)
+  const existingCollectionNames = existingCollections.map((c) => c.name)
   const results = {}
-  const col = connection.edgeCollection(migration.name)
-
+  let col
   if (!existingCollectionNames.includes(migration.name)) {
     try {
-      await col.create(migration.options)
+      col = await connection.createEdgeCollection(migration.name)
     } catch (e) {
       throw new Error(
-        `Creating edge collection ${migration.name} failed: ${e.message}`,
+        `Creating edge collection "${migration.name}" failed: ${e.message}`,
       )
     }
   }

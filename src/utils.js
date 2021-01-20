@@ -6,11 +6,11 @@ const { migrateDatabase } = require('./migrateDatabase')
 const { migrateGeoIndex } = require('./migrateGeoIndex')
 const { parse } = require('path')
 
-const getFilenameFromPath = path => parse(path).base
+const getFilenameFromPath = (path) => parse(path).base
 
 module.exports.getFilenameFromPath = getFilenameFromPath
 
-const dbNameFromFile = filename =>
+const dbNameFromFile = (filename) =>
   getFilenameFromPath(filename).replace(/\./g, '_') + '_' + Date.now()
 
 module.exports.dbNameFromFile = dbNameFromFile
@@ -26,19 +26,20 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
   return {
     migrate: async (migrations = []) => {
       let state = {}
+      let dbResults, documentCollectionResults
       for (const migration of migrations) {
         // Add the url to each migration.
         migration.url = url
         switch (migration.type) {
           case 'database':
-            var dbResults = await migrateDatabase(
+            dbResults = await migrateDatabase(
               newConnection(rootPass, url),
               migration,
             )
             state = assign({}, state, dbResults)
             break
           case 'documentcollection':
-            var documentCollectionResults = await migrateDocumentCollection(
+            documentCollectionResults = await migrateDocumentCollection(
               newConnection(rootPass, url),
               migration,
             )

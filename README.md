@@ -2,7 +2,7 @@
 
 [ArangoJS](https://github.com/arangodb/arangojs) describes itself as "The
 official ArangoDB low-level JavaScript client". The "low-level" part never
-really meant much to me in my inital usage.  Over time I've been finding
+really meant much to me in my inital usage. Over time I've been finding
 patterns in my own usage and accumulated workarounds, which I kept telling
 myself I would extract into a library. This is that library.
 
@@ -25,28 +25,30 @@ let name = dbNameFromFile(__filename)
 
 let { migrate } = await ArangoTools({ rootPass, url })
 
-let {query, truncate, drop, transaction, collections} = await migrate([
-	{
-		type: 'database',
-		databaseName: name,
-		users: [{ username: 'mike', passwd: 'sekret' }],
-	},
-	{
-		type: 'documentcollection',
-		databaseName: name,
-		name: 'widgets',
-		options: { journalsize: 10485760, waitforsync: true },
-	},
-	{
-		type: 'geoindex',
-		databaseName: name,
-		collection: 'places',
-		fields: ['pts'],
-		geojson: true,
-	},
+let { query, truncate, drop, transaction, collections } = await migrate([
+  {
+    type: 'database',
+    databaseName: name,
+    users: [{ username: 'mike', passwd: 'sekret' }],
+  },
+  {
+    type: 'documentcollection',
+    databaseName: name,
+    name: 'widgets',
+    options: { journalsize: 10485760, waitforsync: true },
+  },
+  {
+    type: 'geoindex',
+    databaseName: name,
+    collection: 'places',
+    options: {
+      fields: ['pts'],
+      geoJson: true,
+    },
+  },
 ])
 
-await collections.widgets.save({foo: "bar"})
+await collections.widgets.save({ foo: 'bar' })
 
 let cursor = await query`
 FOR widget IN widgets
@@ -66,4 +68,4 @@ It's early!
 
 The current implementation is basic but works. Currently the only migrations
 that work are creating a database, a document collection and a GeoIndex. Other
-types of indexes as well as graphs and edge collections will be added soon.  
+types of indexes as well as graphs and edge collections will be added soon.
