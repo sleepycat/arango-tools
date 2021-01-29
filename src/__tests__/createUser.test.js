@@ -25,14 +25,9 @@ describe('createUser', () => {
   it('creates a user in ArangoDB', async () => {
     const name = generateName()
     await sys.createDatabase(name)
-    const db = new Database()
-    db.useDatabase(name)
-    db.useBasicAuth('root', password)
 
-    const randomName = `testUser${Math.random()
-      .toString(36)
-      .substring(7)}`
-    const user = await createUser(db, {
+    const randomName = `createuser_succceeds_{Math.random().toString(36).substring(7)}`
+    const user = await createUser(sys, {
       user: randomName,
       passwd: 'soopersekret',
     })
@@ -44,15 +39,23 @@ describe('createUser', () => {
   })
 
   it(`doesn't barf if the user exists`, async () => {
+
+    const name = `createuser_when_user_exists_${Math.random().toString(36).substring(7)}`
+
     await createUser(sys, {
-      user: 'mike',
+      user: name,
       passwd: 'soopersekret',
     })
-    expect(async () => {
-      await createUser(sys, {
-        user: 'mike',
-        passwd: 'soopersekret',
-      })
-    }).not.toThrow()
+
+    try {
+      expect(async () => {
+        await createUser(sys, {
+          user: name,
+          passwd: 'soopersekret',
+        })
+      }).not.toThrow()
+    } finally {
+      await deleteUser(sys, name)
+    }
   })
 })
