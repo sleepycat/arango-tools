@@ -1,6 +1,6 @@
 {
   "name": "arango-tools",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "description": "tools for working with ArangoDB",
   "main": "index.js",
   "scripts": {
