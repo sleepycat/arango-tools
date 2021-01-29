@@ -1,15 +1,13 @@
-const { parse } = require('path')
+const { dbNameFromFile } = require('../utils')
 const { Database } = require('arangojs')
 const { createUser } = require('../createUser')
+const { deleteUser } = require('../deleteUser')
 const { grantAccess } = require('../grantAccess')
 
 const {
   ARANGOTOOLS_DB_URL: url,
   ARANGOTOOLS_DB_PASSWORD: password,
 } = process.env
-
-const generateName = () =>
-  parse(__filename).base.replace(/\./g, '_') + '_' + Date.now()
 
 const rootPass = password
 let sys
@@ -22,19 +20,24 @@ describe('grantAccess', () => {
   })
 
   it('gives an ArangoDB user permissions on a database', async () => {
-    const name = generateName()
+    const name = dbNameFromFile(__filename)
     await sys.createDatabase(name)
     const db = new Database()
     db.useDatabase(name)
-    db.useBasicAuth('root', password)
+    db.login('root', password)
 
     const { user } = await createUser(sys, {
-      user: 'mike',
+      user: name,
       passwd: 'soopersekret',
     })
 
-    const permission = await grantAccess(sys, name, user)
-    sys.dropDatabase(name)
-    expect(permission[name]).toEqual('rw')
+    try {
+      const permission = await grantAccess(sys, name, user)
+
+      expect(permission[name]).toEqual('rw')
+    } finally {
+      sys.dropDatabase(name)
+      await deleteUser(sys, name)
+    }
   })
 })

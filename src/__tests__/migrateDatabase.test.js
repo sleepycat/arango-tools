@@ -2,6 +2,7 @@ require('dotenv-safe').config()
 const { Database } = require('arangojs')
 const { migrateDatabase } = require('../migrateDatabase')
 const { dbNameFromFile } = require('../utils')
+const { deleteUser } = require('../deleteUser')
 
 const {
   ARANGOTOOLS_DB_URL: url,
@@ -57,7 +58,7 @@ describe('migrateDatabase()', () => {
         to: name,
         with: { u = 'root', p = rootPass },
       }) => {
-        const conn = new Database({ url })
+        const conn = new Database({ url, databaseName: name })
         conn.useDatabase(name)
         await conn.login(u, p)
         return conn
@@ -95,71 +96,75 @@ describe('migrateDatabase()', () => {
 
     describe('when creating a database for a non-root user', () => {
       it('creates a database and gives the user permissions on it', async () => {
-        // eslint-disable-next-line
-        const dbname = dbNameFromFile('nonroot' + __filename)
-        const connection = new Database({ url })
-        await connection.login('root', rootPass)
-        connection.useDatabase('_system')
+        const name = 'nonroot_' + dbNameFromFile(__filename)
 
-        await migrateDatabase(connection, {
-          type: 'database',
-          url,
-          databaseName: dbname,
-          users: [{ username: 'mike', passwd: 'secret' }],
-        })
+        const sys = new Database({ url })
+        await sys.login('root', rootPass)
 
-        const userConnection = new Database({ url })
-        userConnection.useDatabase(dbname)
-        await userConnection.login('mike', 'secret')
+        try {
+          await migrateDatabase(sys, {
+            type: 'database',
+            url,
+            databaseName: name,
+            users: [{ username: name, passwd: 'secret' }],
+          })
 
-        const databases = await userConnection.listUserDatabases()
+          const userConnection = new Database({ url, databaseName: name })
+          await userConnection.login(name, 'secret')
 
-        expect(databases).toContain(dbname)
-        await connection.dropDatabase(dbname)
+          const databases = await userConnection.listUserDatabases()
+
+          expect(databases).toContain(name)
+        } finally {
+          await sys.dropDatabase(name)
+          await deleteUser(sys, name)
+        }
       })
 
       it('returns functions to operate on the existing database as the given user', async () => {
-        const dbname = 'a' + dbNameFromFile(__filename)
-        const connection = new Database({ url })
-        connection.useDatabase('_system')
-        connection.useBasicAuth('root', rootPass)
+        const name = 'transaction_' + dbNameFromFile(__filename)
 
-        const response = await migrateDatabase(connection, {
-          type: 'database',
-          url,
-          databaseName: dbname,
-          users: [{ username: 'mike', passwd: 'secret' }],
-        })
+        const sys = new Database({ url })
+        await sys.login('root', rootPass)
 
-        expect(response).toEqual(
-          expect.objectContaining({
-            query: expect.any(Function),
-            truncate: expect.any(Function),
-            drop: expect.any(Function),
-            transaction: expect.any(Function),
-          }),
-        )
+        try {
+          const response = await migrateDatabase(sys, {
+            type: 'database',
+            url,
+            databaseName: name,
+            users: [{ username: name, passwd: 'secret' }],
+          })
 
-        connection.useDatabase('_system')
-        await connection.dropDatabase(dbname)
+          expect(response).toEqual(
+            expect.objectContaining({
+              query: expect.any(Function),
+              truncate: expect.any(Function),
+              drop: expect.any(Function),
+              transaction: expect.any(Function),
+            }),
+          )
+        } finally {
+          await sys.dropDatabase(name)
+          await deleteUser(sys, name)
+        }
       })
 
       it('returns a transaction function that returns a transaction object', async () => {
-        const dbname = 'transaction_' + dbNameFromFile(__filename)
-        const connection = new Database({ url })
-        connection.useDatabase('_system')
-        connection.useBasicAuth('root', rootPass)
+        const name = 'transaction_test' + dbNameFromFile(__filename)
+
+        const sys = new Database({ url })
+        await sys.login('root', rootPass)
 
         try {
-          const response = await migrateDatabase(connection, {
+          const response = await migrateDatabase(sys, {
             type: 'database',
             url,
-            databaseName: dbname,
-            users: [{ username: 'mike', passwd: 'secret' }],
+            databaseName: name,
+            users: [{ username: name, passwd: 'secret' }],
           })
 
-          connection.useDatabase(dbname)
-
+          const connection = new Database({ url, databaseName: name })
+          await connection.login(name, 'secret')
           const collection = connection.collection('potatoes')
           await collection.create()
 
@@ -172,30 +177,35 @@ describe('migrateDatabase()', () => {
             }),
           )
         } finally {
-          connection.useDatabase('_system')
-          await connection.dropDatabase(dbname)
+          await deleteUser(sys, name)
+          await sys.dropDatabase(name)
         }
       })
 
       it('returns a query function that has the count option enabled', async () => {
-        const dbname = 'a' + dbNameFromFile(__filename)
+        const name = 'query_count_' + dbNameFromFile(__filename)
+        const sys = new Database({ url })
+        await sys.login('root', rootPass)
+
         const connection = new Database({ url })
         connection.useDatabase('_system')
         connection.useBasicAuth('root', rootPass)
 
-        const response = await migrateDatabase(connection, {
-          type: 'database',
-          url,
-          databaseName: dbname,
-          users: [{ username: 'mike', passwd: 'secret' }],
-        })
+        try {
+          const response = await migrateDatabase(connection, {
+            type: 'database',
+            url,
+            databaseName: name,
+            users: [{ username: name, passwd: 'secret' }],
+          })
 
-        const cursor = await response.query`FOR i IN [1,2,3] RETURN i`
+          const cursor = await response.query`FOR i IN [1,2,3] RETURN i`
 
-        expect(cursor).toMatchObject({ count: 3 })
-
-        connection.useDatabase('_system')
-        await connection.dropDatabase(dbname)
+          expect(cursor).toMatchObject({ count: 3 })
+        } finally {
+          await sys.dropDatabase(name)
+          await deleteUser(sys, name)
+        }
       })
     })
   })

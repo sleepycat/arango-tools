@@ -1,10 +1,17 @@
 # ArangoTools
 
-[ArangoJS](https://github.com/arangodb/arangojs) describes itself as "The
-official ArangoDB low-level JavaScript client". The "low-level" part never
-really meant much to me in my inital usage. Over time I've been finding
-patterns in my own usage and accumulated workarounds, which I kept telling
-myself I would extract into a library. This is that library.
+The goal of of this library is to provide a declarative set of
+[invariants](https://softwareengineering.stackexchange.com/a/32755/153496) at
+the database level.
+
+Influenced by the great [DX](https://bit.ly/2YomoYC) of MongoDB, and the
+declarative model, wherever permissions allow, arango-tools will create
+resources you've said should exist. Both the `ensure` and `migrate` functions
+are idempotent, and create resources only when the don't exist.
+
+Basically you should be able to state your intent, and know when it couldn't
+happen. Think [dotenv-save](https://www.npmjs.com/package/dotenv-safe), but for
+database stuff.
 
 ## Installation
 
@@ -14,12 +21,44 @@ npm install arango-tools
 
 ## Usage
 
-The `migrate` call takes a set of json documents describing the desired state
-of the database, and returns a set of functions that allow you act on the
-objects you just created.
-Migrations are idempotent, and create resources only when the don't exist.
+The `ensure` function takes an object describing the desired state of the
+database; your invariants, the collections and whatnot that must exist for your
+program to run. When invariants hold, you're passed a set of accessor functions
+that allow you to interact with the database. When they do not, a descriptive
+error is raised.
 
 ```javascript
+// new simplified API! 😀
+const { ensure } = require('arango-tools')
+
+let { query, truncate, drop, transaction, collections } = await ensure({
+  type: 'database',
+  name: "myapp",
+  url: "http://localhost:8529", // default
+  rootPassword: 'secret', // optional when the database exists!
+  options: [
+    { type: 'user', username: 'mike', password: 'test' },
+    {
+      type: 'documentcollection',
+      name: 'people',
+      options: { journalsize: 10485760, waitforsync: true },
+    },
+    {
+      type: 'edgecollection',
+      name: 'likes',
+      options: { journalsize: 10485760, waitforsync: true },
+    },
+    {
+      type: 'geoindex',
+      on: 'places',
+      fields: ['lat', 'lng'],
+      geoJson: true,
+    },
+  ],
+})
+
+// Old deprecated API 🙁
+// Will be removed in 1.0
 const { ArangoTools, dbNameFromFile } = require('arango-tools')
 let name = dbNameFromFile(__filename)
 
@@ -64,8 +103,5 @@ await drop()
 
 ## Issues
 
-It's early!
-
-The current implementation is basic but works. Currently the only migrations
-that work are creating a database, a document collection and a GeoIndex. Other
-types of indexes as well as graphs and edge collections will be added soon.
+Currently arango-tools can only create a database, a document/edge collection and a GeoIndex. 
+Other types of indexes as well as graphs and views will be added soon.
