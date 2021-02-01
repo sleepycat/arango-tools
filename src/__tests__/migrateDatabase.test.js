@@ -12,85 +12,79 @@ const {
 describe('migrateDatabase()', () => {
   describe('given an existing database', () => {
     describe('when creating a database for the root user', () => {
-      let databaseName, connection
+      it('is possible to log into the created database', async () => {
+        // run a migration for a database of the same name
+        const name = 'login_possible_' + dbNameFromFile(__filename)
+        const sys = new Database({ url, databaseName: '_system' })
+        await sys.login('root', rootPass)
 
-      beforeEach(async () => {
-        // eslint-disable-next-line
-        databaseName = dbNameFromFile('existing' + __filename)
-        // create a connection
-        connection = new Database({ url })
-        await connection.login('root', rootPass)
-        connection.useDatabase('_system')
+        await migrateDatabase(sys, {
+          type: 'database',
+          url,
+          databaseName: name,
+          users: [{ username: name, passwd: 'test' }],
+        })
 
-        // make an existing database
-        await connection.createDatabase(databaseName)
+        try {
+          const newdb = new Database({ url, databaseName: name })
+          await newdb.login(name, 'test')
+
+          await expect(newdb.exists()).resolves.toEqual(true)
+        } finally {
+          await sys.dropDatabase(name)
+          await deleteUser(sys, name)
+        }
       })
-
-      afterEach(async () => {
-        await connection.dropDatabase(databaseName)
-      })
-
       it('returns functions to operate on the existing database as the root user', async () => {
         // run a migration for a database of the same name
-        await expect(
-          migrateDatabase(connection, {
-            type: 'database',
-            url,
-            databaseName,
-            users: [{ username: 'root', passwd: rootPass }],
-          }),
-        ).resolves.toEqual(
-          expect.objectContaining({
-            query: expect.any(Function),
-            drop: expect.any(Function),
-            truncate: expect.any(Function),
-          }),
-        )
+        const name = 'existing_db_' + dbNameFromFile(__filename)
+        const sys = new Database({ url })
+        await sys.login('root', rootPass)
+
+        const migration = {
+          type: 'database',
+          url,
+          databaseName: name,
+          users: [{ username: name, passwd: 'test' }],
+        }
+
+        await sys.createDatabase(name, migration.users)
+
+        try {
+          await expect(migrateDatabase(sys, migration)).resolves.toEqual(
+            expect.objectContaining({
+              query: expect.any(Function),
+              drop: expect.any(Function),
+              truncate: expect.any(Function),
+            }),
+          )
+        } finally {
+          await sys.dropDatabase(name)
+          await deleteUser(sys, name)
+        }
       })
     })
   })
 
   describe('given no databases exist', () => {
     describe('when creating a database for a root user', () => {
-      let databaseName, connection
+      it('creates a database', async () => {
+        const name = 'nodb_' + dbNameFromFile(__filename)
+        const sys = new Database({ url })
+        await sys.login('root', rootPass)
 
-      const connect = async ({
-        to: name,
-        with: { u = 'root', p = rootPass },
-      }) => {
-        const conn = new Database({ url, databaseName: name })
-        conn.useDatabase(name)
-        await conn.login(u, p)
-        return conn
-      }
+        try {
+          await migrateDatabase(sys, {
+            type: 'database',
+            url,
+            databaseName: name,
+            users: [{ username: 'root', passwd: rootPass }],
+          })
 
-      beforeEach(async () => {
-        databaseName = dbNameFromFile(__filename)
-        connection = new Database({ url })
-        await connection.login('root', rootPass)
-        connection.useDatabase('_system')
-      })
-
-      afterEach(async () => {
-        await connection.dropDatabase(databaseName)
-      })
-
-      it('creates a database that is accessible to the root user', async () => {
-        await migrateDatabase(connection, {
-          type: 'database',
-          url,
-          databaseName,
-          users: [{ username: 'root', passwd: rootPass }],
-        })
-
-        const rootConnection = await connect({
-          with: { u: 'root', p: rootPass },
-          to: databaseName,
-        })
-
-        await expect(rootConnection.listUserDatabases()).resolves.toContain(
-          databaseName,
-        )
+          await expect(sys.listUserDatabases()).resolves.toContain(name)
+        } finally {
+          await sys.dropDatabase(name)
+        }
       })
     })
 
