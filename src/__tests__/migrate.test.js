@@ -14,9 +14,8 @@ describe('migrate', () => {
 
     const name = 'migrate_returns_query_' + dbNameFromFile(__filename)
 
-    const sys = new Database()
-    sys.useDatabase('_system')
-    sys.useBasicAuth('root', rootPass)
+    const sys = new Database({ url })
+    await sys.login('root', rootPass)
 
     try {
       const { query } = await migrate([

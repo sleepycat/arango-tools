@@ -15,10 +15,9 @@ const dbNameFromFile = (filename) =>
 
 module.exports.dbNameFromFile = dbNameFromFile
 
-const newConnection = (rootPass, url) => {
-  const sys = new Database({ url })
-  sys.useDatabase('_system')
-  sys.useBasicAuth('root', rootPass)
+const newConnection = async (rootPass, url) => {
+  const sys = new Database({ url, databaseName: '_system' })
+  await sys.login('root', rootPass)
   return sys
 }
 
@@ -26,39 +25,42 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
   return {
     migrate: async (migrations = []) => {
       let state = {}
-      let dbResults, documentCollectionResults
       for (const migration of migrations) {
         // Add the url to each migration.
         migration.url = url
         switch (migration.type) {
-          case 'database':
-            dbResults = await migrateDatabase(
-              newConnection(rootPass, url),
+          case 'database': {
+            const dbResults = await migrateDatabase(
+              await newConnection(rootPass, url),
               migration,
             )
             state = assign({}, state, dbResults)
             break
-          case 'documentcollection':
-            documentCollectionResults = await migrateDocumentCollection(
-              newConnection(rootPass, url),
+          }
+          case 'documentcollection': {
+            const documentCollectionResults = await migrateDocumentCollection(
+              await newConnection(rootPass, url),
               migration,
             )
             state = assign({}, state, {
               collections: documentCollectionResults,
             })
             break
-          case 'edgecollection':
-            var edgeCollectionResults = await migrateEdgeCollection(
-              newConnection(rootPass, url),
+          }
+          case 'edgecollection': {
+            const edgeCollectionResults = await migrateEdgeCollection(
+              await newConnection(rootPass, url),
               migration,
             )
             state = assign({}, state, {
               collections: edgeCollectionResults,
             })
             break
-          case 'geoindex':
-            await migrateGeoIndex(newConnection(rootPass, url), migration)
+          }
+          case 'geoindex': {
+            await migrateGeoIndex(await newConnection(rootPass, url), migration)
             break
+          }
           default:
             console.log('Not implemented yet: ', migration)
         }

@@ -3,7 +3,9 @@ const { Database, aql } = require('arangojs')
 const migrateDatabase = async (connection, migration) => {
   // TODO: check migration schema
   try {
-    await connection.createDatabase(migration.databaseName, migration.users)
+    await connection.createDatabase(migration.databaseName, {
+      users: migration.users,
+    })
   } catch (e) {
     // if the error is just a duplicate name thats ok. We'll just wrap it
     // up and return it.
@@ -15,8 +17,10 @@ const migrateDatabase = async (connection, migration) => {
   // TODO: need to rework things in a few places to
   // make this work for multiple users
   const [user] = migration.users
-  const output = new Database({ url: migration.url })
-  output.useDatabase(migration.databaseName)
+  const output = new Database({
+    url: migration.url,
+    databaseName: migration.databaseName,
+  })
   await output.login(user.username, user.passwd)
 
   return {
