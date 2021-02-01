@@ -5,12 +5,12 @@ The goal of of this library is to provide a declarative set of
 the database level.
 
 Influenced by the great [DX](https://bit.ly/2YomoYC) of MongoDB, and the
-declarative model, wherever permissions allow, arango-tools will create
+declarative model, wherever permissions allow arango-tools will create
 resources you've said should exist. Both the `ensure` and `migrate` functions
-are idempotent, and create resources only when the don't exist.
+are idempotent, and create resources only when they don't exist.
 
-Basically you should be able to state your intent, and know when it couldn't
-happen. Think [dotenv-save](https://www.npmjs.com/package/dotenv-safe), but for
+Basically, you should be able to state your intent and know when it couldn't
+happen. Think [dotenv-safe](https://www.npmjs.com/package/dotenv-safe), but for
 database stuff.
 
 ## Installation
