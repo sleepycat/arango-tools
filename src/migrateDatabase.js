@@ -29,10 +29,13 @@ const migrateDatabase = async (connection, migration) => {
     drop: () => {
       connection.dropDatabase(migration.databaseName)
     },
-    truncate: () =>
-      Promise.all(
-        output.collections().map((collection) => collection.truncate()),
-      ),
+    truncate: async () => {
+      const collections = await output.collections()
+      for (const collection of collections) {
+        await collection.truncate()
+      }
+      return true
+    },
     transaction: (collections) => output.beginTransaction(collections),
   }
 }

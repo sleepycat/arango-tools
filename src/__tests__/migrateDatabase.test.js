@@ -35,6 +35,43 @@ describe('migrateDatabase()', () => {
           await deleteUser(sys, name)
         }
       })
+
+      it('returns a working truncate function', async () => {
+        // run a migration for a database of the same name
+        const name = 'truncate_works_' + dbNameFromFile(__filename)
+        const sys = new Database({ url })
+        await sys.login('root', rootPass)
+
+        const migration = {
+          type: 'database',
+          url,
+          databaseName: name,
+          users: [{ username: name, passwd: 'test' }],
+        }
+
+        await sys.createDatabase(name, migration.users)
+
+        const db = new Database({ url, databaseName: name })
+        await db.login(name, 'test')
+        const collection = await db.createCollection('foos')
+        await collection.save({ foo: 'bar' })
+
+        const { query, truncate } = await migrateDatabase(sys, migration)
+
+        try {
+          const before = await query`FOR foo IN foos RETURN foo`
+          expect(before.count).toEqual(1)
+
+          await truncate()
+
+          const after = await query`FOR foo IN foos RETURN foo`
+          expect(after.count).toEqual(0)
+        } finally {
+          await sys.dropDatabase(name)
+          await deleteUser(sys, name)
+        }
+      })
+
       it('returns functions to operate on the existing database as the root user', async () => {
         // run a migration for a database of the same name
         const name = 'existing_db_' + dbNameFromFile(__filename)

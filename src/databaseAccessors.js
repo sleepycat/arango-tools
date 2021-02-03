@@ -15,7 +15,9 @@ function databaseAccessors({ connection, rootConnection }) {
     },
     truncate: async () => {
       const collections = await connection.collections()
-      await Promise.all(collections.map((collection) => collection.truncate()))
+      for (const collection of collections) {
+        await collection.truncate()
+      }
       return true
     },
     transaction: (collections) => connection.beginTransaction(collections),
