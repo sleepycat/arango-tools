@@ -36,6 +36,32 @@ describe('migrateDatabase()', () => {
         }
       })
 
+      it('returns a working drop function', async () => {
+        // run a migration for a database of the same name
+        const name = 'truncate_works_' + dbNameFromFile(__filename)
+        const sys = new Database({ url })
+        await sys.login('root', rootPass)
+
+        const migration = {
+          type: 'database',
+          url,
+          databaseName: name,
+          users: [{ username: name, passwd: 'test' }],
+        }
+
+        await sys.createDatabase(name, migration.users)
+
+        const { drop } = await migrateDatabase(sys, migration)
+
+        const before = await sys.listDatabases()
+        expect(before).toContain(name)
+
+        await drop()
+
+        const after = await sys.listDatabases()
+        expect(after).not.toContain(name)
+      })
+
       it('returns a working truncate function', async () => {
         // run a migration for a database of the same name
         const name = 'truncate_works_' + dbNameFromFile(__filename)

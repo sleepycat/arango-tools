@@ -27,7 +27,7 @@ const migrateDatabase = async (connection, migration) => {
     query: (strings, ...vars) =>
       output.query(aql(strings, ...vars), { count: true }),
     drop: () => {
-      connection.dropDatabase(migration.databaseName)
+      return connection.dropDatabase(migration.databaseName)
     },
     truncate: async () => {
       const collections = await output.collections()
