@@ -4,6 +4,7 @@ const { collection: createCollection } = require('./collection')
 const { databaseAccessors } = require('./databaseAccessors')
 const { collectionAccessors } = require('./collectionAccessors')
 const { geoIndex } = require('./geoIndex')
+const { searchView } = require('./searchView')
 
 async function ensure(
   database = { url: 'http://localhost:8529', options: [] },
@@ -79,9 +80,19 @@ async function ensure(
 
         break
       }
-      case 'geoindex':
+      case 'geoindex': {
         await geoIndex({ connection, ...option })
         break
+      }
+      case 'searchview': {
+        const { message } = await searchView({
+          connection,
+          name: option.name,
+          options: option.options,
+        })
+        if (message) throw new Error(message)
+        break
+      }
       default:
         console.log('Not implemented yet: ', option)
     }

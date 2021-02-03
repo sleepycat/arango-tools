@@ -70,6 +70,12 @@ describe('migrate', () => {
           name: 'edges',
         },
         {
+          type: 'searchview',
+          databaseName: name,
+          name: 'myview',
+          options: {},
+        },
+        {
           type: 'geoindex',
           databaseName: name,
           collection: 'places',

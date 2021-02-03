@@ -33,8 +33,8 @@ const { ensure } = require('arango-tools')
 
 let { query, truncate, drop, transaction, collections } = await ensure({
   type: 'database',
-  name: "myapp",
-  url: "http://localhost:8529", // default
+  name: 'myapp',
+  url: 'http://localhost:8529', // default
   rootPassword: 'secret', // optional when the database exists!
   options: [
     { type: 'user', username: 'mike', password: 'test' },
@@ -47,6 +47,20 @@ let { query, truncate, drop, transaction, collections } = await ensure({
       type: 'edgecollection',
       name: 'likes',
       options: { journalsize: 10485760, waitforsync: true },
+    },
+    {
+      type: 'searchview',
+      name: 'placeview',
+      options: {
+        links: {
+          places: {
+            fields: {
+              name: { analyzers: ['text_en'] },
+              description: { analyzers: ['text_en'] },
+            },
+          },
+        },
+      },
     },
     {
       type: 'geoindex',
@@ -77,6 +91,12 @@ let { query, truncate, drop, transaction, collections } = await migrate([
     options: { journalsize: 10485760, waitforsync: true },
   },
   {
+    type: 'searchview',
+    databaseName: name,
+    name: 'myview',
+    options: {},
+  },
+  {
     type: 'geoindex',
     databaseName: name,
     collection: 'places',
@@ -103,5 +123,5 @@ await drop()
 
 ## Issues
 
-Currently arango-tools can only create a database, a document/edge collection and a GeoIndex. 
-Other types of indexes as well as graphs and views will be added soon.
+Currently arango-tools can create a database, a document/edge collection, a search view and a GeoIndex.
+Other types and graphs will be added soon.
