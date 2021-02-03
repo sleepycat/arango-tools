@@ -78,10 +78,10 @@ describe('databaseAccessors', () => {
 
       try {
         const { drop } = databaseAccessors({ connection })
-        await expect(drop()).rejects.toThrow(/requires root/i)
+        await expect(() => drop()).toThrow(/requires root/i)
       } finally {
         await deleteUser(sys, name)
-      await sys.dropDatabase(name)
+        await sys.dropDatabase(name)
       }
     })
   })
@@ -103,7 +103,7 @@ describe('databaseAccessors', () => {
         const { drop } = databaseAccessors({ connection, rootConnection: sys })
         await drop()
         const databases = await sys.listDatabases()
-        expect(databases.includes(name)).toEqual(false)
+        expect(databases).not.toContain(name)
       } finally {
         await deleteUser(sys, name)
       }

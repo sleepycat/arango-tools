@@ -4,9 +4,9 @@ function databaseAccessors({ connection, rootConnection }) {
   return {
     query: (strings, ...vars) =>
       connection.query(aql(strings, ...vars), { count: true }),
-    drop: async () => {
+    drop: () => {
       if (rootConnection) {
-        await rootConnection.dropDatabase(connection.name)
+        return rootConnection.dropDatabase(connection.name)
       } else {
         throw new Error(
           `Dropping database "${connection.name}" requires root privileges.`,
