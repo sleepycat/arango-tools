@@ -4,6 +4,7 @@ const { migrateDocumentCollection } = require('./migrateDocumentCollection')
 const { migrateEdgeCollection } = require('./migrateEdgeCollection')
 const { migrateDatabase } = require('./migrateDatabase')
 const { migrateGeoIndex } = require('./migrateGeoIndex')
+const { searchView } = require('./searchView')
 const { parse } = require('path')
 
 const getFilenameFromPath = (path) => parse(path).base
@@ -59,6 +60,15 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
           }
           case 'geoindex': {
             await migrateGeoIndex(await newConnection(rootPass, url), migration)
+            break
+          }
+          case 'searchview': {
+            const { message } = await searchView({
+              connection: await newConnection(rootPass, url),
+              name: migration.name,
+              options: migration.options,
+            })
+            if (message) throw new Error(message)
             break
           }
           default:
