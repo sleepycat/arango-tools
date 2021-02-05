@@ -46,7 +46,7 @@ describe('migrateDatabase()', () => {
           type: 'database',
           url,
           databaseName: name,
-          users: [{ username: name, passwd: 'test' }],
+          users: [],
         }
 
         await sys.createDatabase(name, migration.users)
