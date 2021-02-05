@@ -53,13 +53,17 @@ describe('migrateDatabase()', () => {
 
         const { drop } = await migrateDatabase(sys, migration)
 
-        const before = await sys.listDatabases()
-        expect(before).toContain(name)
+        try {
+          const before = await sys.listDatabases()
+          expect(before).toContain(name)
 
-        await drop()
+          await drop()
 
-        const after = await sys.listDatabases()
-        expect(after).not.toContain(name)
+          const after = await sys.listDatabases()
+          expect(after).not.toContain(name)
+        } finally {
+          await deleteUser(sys, name)
+        }
       })
 
       it('returns a query using a proxied transaction for compatibility', async () => {
