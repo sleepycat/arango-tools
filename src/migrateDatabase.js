@@ -25,16 +25,7 @@ const migrateDatabase = async (connection, migration) => {
 
   return {
     query: async function query(strings, ...vars) {
-      const cursor = await output.query(aql(strings, ...vars), { count: true })
-      return new Proxy(cursor, {
-        get(target, name, receiver) {
-          // arangojs renamed each to forEach
-          if (name === 'each') {
-            return Reflect.get(target, 'forEach', receiver)
-          }
-          return Reflect.get(target, name, receiver)
-        },
-      })
+      return output.query(aql(strings, ...vars), { count: true })
     },
     drop: () => {
       return connection.dropDatabase(migration.databaseName)
@@ -47,17 +38,7 @@ const migrateDatabase = async (connection, migration) => {
       return true
     },
     transaction: async function transaction(collections) {
-      const cursor = await output.beginTransaction(collections)
-      return new Proxy(cursor, {
-        get(target, name, receiver) {
-          // arangojs renamed run to step
-          if (name === 'run') {
-            return Reflect.get(target, 'step', receiver)
-            //
-          }
-          return Reflect.get(target, name, receiver)
-        },
-      })
+      return output.beginTransaction(collections)
     },
   }
 }

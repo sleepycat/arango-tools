@@ -66,56 +66,6 @@ describe('migrateDatabase()', () => {
         }
       })
 
-      it('returns a query using a proxied transaction for compatibility', async () => {
-        // arangojs renamed txn.run to txn.step
-        // https://arangodb.github.io/arangojs/CHANGELOG#transaction-api
-        const name = 'proxied_transaction_' + dbNameFromFile(__filename)
-        const sys = new Database({ url })
-        await sys.login('root', rootPass)
-
-        const migration = {
-          type: 'database',
-          url,
-          databaseName: name,
-          users: [{ username: name, passwd: 'test' }],
-        }
-
-        try {
-          const { transaction } = await migrateDatabase(sys, migration)
-
-          const txn = await transaction({})
-          expect(txn.run).toBeTruthy()
-        } finally {
-          await sys.dropDatabase(name)
-          await deleteUser(sys, name)
-        }
-      })
-
-      it('returns a query using a proxied cursor for compatibility', async () => {
-        // arangojs renamed cursor.each to cursor.forEach
-        // https://arangodb.github.io/arangojs/CHANGELOG#cursor-api-1
-        const name = 'proxied_cursor_' + dbNameFromFile(__filename)
-        const sys = new Database({ url })
-        await sys.login('root', rootPass)
-
-        const migration = {
-          type: 'database',
-          url,
-          databaseName: name,
-          users: [{ username: name, passwd: 'test' }],
-        }
-
-        try {
-          const { query } = await migrateDatabase(sys, migration)
-
-          const cursor = await query`RETURN 1`
-          expect(cursor.each).toBeTruthy()
-        } finally {
-          await sys.dropDatabase(name)
-          await deleteUser(sys, name)
-        }
-      })
-
       it('returns a working truncate function', async () => {
         // run a migration for a database of the same name
         const name = 'truncate_works_' + dbNameFromFile(__filename)
