@@ -49,6 +49,11 @@ let { query, truncate, drop, transaction, collections } = await ensure({
       options: { journalsize: 10485760, waitforsync: true },
     },
     {
+      type: 'delimiteranalyzer',
+      name: 'my-delimiter-analyzer',
+      delimiter: ';',
+    },
+    {
       type: 'searchview',
       name: 'placeview',
       options: {
@@ -91,6 +96,12 @@ let { query, truncate, drop, transaction, collections } = await migrate([
     options: { journalsize: 10485760, waitforsync: true },
   },
   {
+    type: 'delimiteranalyzer',
+    databaseName: name,
+    name: 'my-delimiter-analyzer',
+    delimiter: ';',
+  },
+  {
     type: 'searchview',
     databaseName: name,
     name: 'myview',
@@ -123,5 +134,5 @@ await drop()
 
 ## Issues
 
-Currently arango-tools can create a database, a document/edge collection, a search view and a GeoIndex.
+Currently arango-tools can create a database, a document/edge collection, a search view, delimiter analyzer and a GeoIndex.
 Other types and graphs will be added soon.

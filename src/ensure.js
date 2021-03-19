@@ -5,6 +5,7 @@ const { databaseAccessors } = require('./databaseAccessors')
 const { collectionAccessors } = require('./collectionAccessors')
 const { geoIndex } = require('./geoIndex')
 const { searchView } = require('./searchView')
+const { delimiterAnalyzer } = require('./delimiterAnalyzer')
 
 async function ensure(
   database = { url: 'http://localhost:8529', options: [] },
@@ -89,6 +90,15 @@ async function ensure(
           connection,
           name: option.name,
           options: option.options,
+        })
+        if (message) throw new Error(message)
+        break
+      }
+      case 'delimiteranalyzer': {
+        const { message } = await delimiterAnalyzer({
+          connection,
+          name: option.name,
+          delimiter: option.delimiter,
         })
         if (message) throw new Error(message)
         break

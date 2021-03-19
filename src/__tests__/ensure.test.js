@@ -10,6 +10,59 @@ const {
 describe('ensure', () => {
   describe('with an existing database', () => {
     describe('as a user', () => {
+      it('succeeds in adding a delimiter analyzer to arango', async () => {
+        const name = dbNameFromFile(__filename)
+        const sys = new Database({ url })
+        await sys.login('root', rootPassword)
+
+        // make the database
+        await sys.createDatabase(name, {
+          users: [{ user: name, passwd: 'test', active: true }],
+        })
+
+        try {
+          // try to verify with ensure
+          await ensure({
+            type: 'database',
+            name,
+            url,
+            options: [
+              { type: 'user', username: name, password: 'test' },
+              {
+                type: 'documentcollection',
+                databaseName: name,
+                name: 'places',
+                options: { journalsize: 10485760, waitforsync: true },
+              },
+              {
+                type: 'delimiteranalyzer',
+                name: 'my-delimiter-analyzer',
+                delimiter: ';',
+              },
+            ],
+          })
+
+          const db = new Database({ url, databaseName: name })
+          await db.login(name, 'test')
+
+          const analyzer = db.analyzer('my-delimiter-analyzer')
+          const definition = await analyzer.get()
+
+          expect(definition).toMatchObject({
+            properties: {
+              delimiter: ';',
+            },
+          })
+        } finally {
+          await sys.dropDatabase(name)
+          await deleteUser(sys, name)
+        }
+      })
+    })
+  })
+
+  describe('with an existing database', () => {
+    describe('as a user', () => {
       it('succeeds in adding a search view to arango', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -74,6 +127,11 @@ describe('ensure', () => {
           await deleteUser(sys, name)
         }
       })
+    })
+  })
+
+  describe('with an existing database', () => {
+    describe('as a user', () => {
       it('succeeds in adding a database to arango', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -107,7 +165,11 @@ describe('ensure', () => {
           await deleteUser(sys, name)
         }
       })
+    })
+  })
 
+  describe('with an existing database', () => {
+    describe('as a user', () => {
       it('returns accessor functions', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -147,7 +209,11 @@ describe('ensure', () => {
           await deleteUser(sys, name)
         }
       })
+    })
+  })
 
+  describe('with an existing database', () => {
+    describe('as a user', () => {
       it('returns the full set of accessors', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -200,7 +266,11 @@ describe('ensure', () => {
           await deleteUser(sys, name)
         }
       })
+    })
+  })
 
+  describe('with an existing database', () => {
+    describe('as a user', () => {
       it('returns a query function set to the specified user', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
