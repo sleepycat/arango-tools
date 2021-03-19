@@ -5,6 +5,7 @@ const { migrateEdgeCollection } = require('./migrateEdgeCollection')
 const { migrateDatabase } = require('./migrateDatabase')
 const { migrateGeoIndex } = require('./migrateGeoIndex')
 const { searchView } = require('./searchView')
+const { delimiterAnalyzer } = require('./delimiterAnalyzer')
 const { parse } = require('path')
 
 const getFilenameFromPath = (path) => parse(path).base
@@ -67,6 +68,21 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
               connection: await newConnection(rootPass, url),
               name: migration.name,
               options: migration.options,
+            })
+            if (message) throw new Error(message)
+            break
+          }
+          case 'delimiteranalyzer': {
+            const target = new Database({
+              url,
+              databaseName: migration.databaseName,
+            })
+            await target.login('root', rootPass)
+
+            const { message } = await delimiterAnalyzer({
+              connection: target,
+              name: migration.name,
+              delimiter: migration.delimiter,
             })
             if (message) throw new Error(message)
             break
