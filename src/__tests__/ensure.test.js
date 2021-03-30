@@ -8,8 +8,8 @@ const {
 } = process.env
 
 describe('ensure', () => {
-  describe('with an existing database', () => {
-    describe('as a user', () => {
+  describe('as a user', () => {
+    describe('with an existing database', () => {
       it('succeeds in adding a delimiter analyzer to arango', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -32,7 +32,7 @@ describe('ensure', () => {
                 type: 'documentcollection',
                 databaseName: name,
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
               {
                 type: 'delimiteranalyzer',
@@ -61,8 +61,8 @@ describe('ensure', () => {
     })
   })
 
-  describe('with an existing database', () => {
-    describe('as a user', () => {
+  describe('as a user', () => {
+    describe('with an existing database', () => {
       it('succeeds in adding a search view to arango', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -85,7 +85,7 @@ describe('ensure', () => {
                 type: 'documentcollection',
                 databaseName: name,
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
               {
                 type: 'searchview',
@@ -110,7 +110,7 @@ describe('ensure', () => {
           const view = db.view('placeview')
           const viewProperties = await view.properties()
 
-          expect(viewProperties.links).toEqual({
+          expect(viewProperties.links).toMatchObject({
             places: {
               analyzers: ['identity'],
               fields: {
@@ -130,8 +130,8 @@ describe('ensure', () => {
     })
   })
 
-  describe('with an existing database', () => {
-    describe('as a user', () => {
+  describe('as a user', () => {
+    describe('with an existing database', () => {
       it('succeeds in adding a database to arango', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -154,7 +154,7 @@ describe('ensure', () => {
                 type: 'documentcollection',
                 databaseName: name,
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
             ],
           })
@@ -168,8 +168,8 @@ describe('ensure', () => {
     })
   })
 
-  describe('with an existing database', () => {
-    describe('as a user', () => {
+  describe('as a user', () => {
+    describe('with an existing database', () => {
       it('returns accessor functions', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -191,7 +191,7 @@ describe('ensure', () => {
                 type: 'documentcollection',
                 databaseName: name,
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
             ],
           })
@@ -212,8 +212,8 @@ describe('ensure', () => {
     })
   })
 
-  describe('with an existing database', () => {
-    describe('as a user', () => {
+  describe('as a user', () => {
+    describe('with an existing database', () => {
       it('returns the full set of accessors', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -234,12 +234,12 @@ describe('ensure', () => {
               {
                 type: 'documentcollection',
                 name: 'people',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
               {
                 type: 'edgecollection',
                 name: 'likes',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
             ],
           })
@@ -269,8 +269,68 @@ describe('ensure', () => {
     })
   })
 
-  describe('with an existing database', () => {
-    describe('as a user', () => {
+  describe('as a user', () => {
+    describe('with an existing database', () => {
+      it('updates mutable collection properties', async () => {
+        const name = dbNameFromFile(__filename)
+        const sys = new Database({ url })
+        await sys.login('root', rootPassword)
+        // make the database
+        await sys.createDatabase(name, {
+          users: [{ user: name, passwd: 'test', active: true }],
+        })
+
+        const schema = {
+          rule: {
+            properties: {
+              nums: { type: 'array', items: { type: 'number', maximum: 6 } },
+            },
+            additionalProperties: { type: 'string' },
+            required: ['nums'],
+          },
+          level: 'moderate',
+          message:
+            "The document does not contain an array of numbers in attribute 'nums', or one of the numbers is bigger than 6.",
+        }
+
+        const connection = new Database({ url, databaseName: name })
+        await connection.login(name, 'test')
+        const collection = connection.collection('places', {
+          schema: null,
+          waitForSync: false,
+        })
+        await collection.create()
+
+        try {
+          // try to verify with ensure
+          await ensure({
+            type: 'database',
+            name,
+            url,
+            options: [
+              { type: 'user', username: name, password: 'test' },
+              {
+                type: 'documentcollection',
+                name: 'places',
+                options: { schema, waitForSync: true },
+              },
+            ],
+          })
+
+          const updated = connection.collection('places')
+          const properties = await updated.properties()
+
+          expect(properties).toMatchObject({ schema, waitForSync: true })
+        } finally {
+          await sys.dropDatabase(name)
+          await deleteUser(sys, name)
+        }
+      })
+    })
+  })
+
+  describe('as a user', () => {
+    describe('with an existing database', () => {
       it('returns a query function set to the specified user', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -291,7 +351,7 @@ describe('ensure', () => {
               {
                 type: 'documentcollection',
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
             ],
           })
@@ -307,8 +367,8 @@ describe('ensure', () => {
     })
   })
 
-  describe('when the database does not exist', () => {
-    describe('as a user', () => {
+  describe('as a user', () => {
+    describe('when the database does not exist', () => {
       it('fails with an instructive error', async () => {
         const name = dbNameFromFile(__filename)
         try {
@@ -321,7 +381,7 @@ describe('ensure', () => {
               {
                 type: 'documentcollection',
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
             ],
           })
@@ -330,8 +390,10 @@ describe('ensure', () => {
         }
       })
     })
+  })
 
-    describe('as root', () => {
+  describe('as root', () => {
+    describe('when the database does not exist', () => {
       it('creates the database', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
@@ -350,12 +412,12 @@ describe('ensure', () => {
               {
                 type: 'documentcollection',
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
               {
                 type: 'documentcollection',
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
             ],
           })
@@ -381,8 +443,10 @@ describe('ensure', () => {
         }
       })
     })
+  })
 
-    describe('as a user', () => {
+  describe('as a user', () => {
+    describe('with an existing database', () => {
       it('creates a geoindex', async () => {
         const name = dbNameFromFile(__filename)
         // try to verify with ensure
@@ -404,7 +468,7 @@ describe('ensure', () => {
               {
                 type: 'documentcollection',
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
               {
                 type: 'geoindex',
@@ -429,8 +493,10 @@ describe('ensure', () => {
         }
       })
     })
+  })
 
-    describe('as root', () => {
+  describe('as root', () => {
+    describe('with an existing database', () => {
       it('creates a geoindex', async () => {
         const name = dbNameFromFile(__filename)
 
@@ -453,7 +519,7 @@ describe('ensure', () => {
               {
                 type: 'documentcollection',
                 name: 'places',
-                options: { journalsize: 10485760, waitforsync: true },
+                options: { journalSize: 10485760, waitForSync: true },
               },
               {
                 type: 'geoindex',

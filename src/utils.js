@@ -1,7 +1,7 @@
 const assign = require('assign-deep')
 const { Database } = require('arangojs')
-const { migrateDocumentCollection } = require('./migrateDocumentCollection')
-const { migrateEdgeCollection } = require('./migrateEdgeCollection')
+const { collection } = require('./collection')
+const { collectionAccessors } = require('./collectionAccessors')
 const { migrateDatabase } = require('./migrateDatabase')
 const { migrateGeoIndex } = require('./migrateGeoIndex')
 const { searchView } = require('./searchView')
@@ -40,22 +40,43 @@ const ArangoTools = ({ rootPass, url = 'http://localhost:8529' }) => {
             break
           }
           case 'documentcollection': {
-            const documentCollectionResults = await migrateDocumentCollection(
-              await newConnection(rootPass, url),
-              migration,
-            )
-            state = assign({}, state, {
-              collections: documentCollectionResults,
+            // connect to the db we want the collection in:
+            const connection = await newConnection(rootPass, url)
+            const userdb = connection.database(migration.databaseName)
+
+            const { collection: col, message } = await collection({
+              connection: userdb,
+              name: migration.name,
+              options: migration.options,
+            })
+            if (!col) throw new Error(message)
+
+            state = Object.assign({}, state, {
+              collections: {
+                ...state.collections,
+                ...collectionAccessors({ collection: col }),
+              },
             })
             break
           }
           case 'edgecollection': {
-            const edgeCollectionResults = await migrateEdgeCollection(
-              await newConnection(rootPass, url),
-              migration,
-            )
-            state = assign({}, state, {
-              collections: edgeCollectionResults,
+            // connect to the db we want the collection in:
+            const connection = await newConnection(rootPass, url)
+            const userdb = connection.database(migration.databaseName)
+
+            const { collection: col, message } = await collection({
+              connection: userdb,
+              type: 'edge',
+              name: migration.name,
+              options: migration.options,
+            })
+            if (!col) throw new Error(message)
+
+            state = Object.assign({}, state, {
+              collections: {
+                ...state.collections,
+                ...collectionAccessors({ collection: col }),
+              },
             })
             break
           }

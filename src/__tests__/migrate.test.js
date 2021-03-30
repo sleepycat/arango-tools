@@ -8,7 +8,106 @@ const {
   ARANGOTOOLS_DB_PASSWORD: rootPass,
 } = process.env
 
+async function createDatabase({
+  called,
+  withUsers = [],
+  connectTo,
+  withRootPass,
+}) {
+  if (!connectTo || !withRootPass) {
+    const { ARANGOTOOLS_DB_URL, ARANGOTOOLS_DB_PASSWORD } = process.env
+    connectTo = ARANGOTOOLS_DB_URL
+    withRootPass = ARANGOTOOLS_DB_PASSWORD
+  }
+  if (!connectTo || !withRootPass)
+    throw new Error(
+      `createDatabase wasn't passed credentials and ARANGOTOOLS_DB_URL and ARANGOTOOLS_DB_PASSWORD wheren't defined in the environment.`,
+    )
+
+  const sys = new Database({ url: connectTo })
+  await sys.login('root', withRootPass)
+  // make the database
+  await sys.createDatabase(called, {
+    users: withUsers,
+  })
+
+  const userdb = new Database({ url, databaseName: called })
+  await userdb.login(called, 'test')
+
+  return { system: sys, db: userdb }
+}
+
+async function createCollection({ called, inDatabase, withOptions = {} }) {
+  const collection = inDatabase.collection(called, withOptions)
+  await collection.create()
+  return collection
+}
+
 describe('migrate', () => {
+  describe('as a user', () => {
+    describe('with an existing database', () => {
+      it('updates mutable collection properties', async () => {
+        const name = 'collection_properties_' + dbNameFromFile(__filename)
+
+        const { system, db: userdb } = await createDatabase({
+          called: name,
+          withUsers: [{ user: name, passwd: 'test', active: true }],
+        })
+
+        // a test schema from the docs
+        const schema = {
+          rule: {
+            properties: {
+              nums: { type: 'array', items: { type: 'number', maximum: 6 } },
+            },
+            additionalProperties: { type: 'string' },
+            required: ['nums'],
+          },
+          level: 'moderate',
+          message:
+            "The document does not contain an array of numbers in attribute 'nums', or one of the numbers is bigger than 6.",
+        }
+
+        await createCollection({
+          called: 'places',
+          inDatabase: userdb,
+          withOptions: {
+            schema: null,
+            waitForSync: false,
+          },
+        })
+
+        const { migrate } = ArangoTools({ rootPass, url })
+        try {
+          await migrate([
+            {
+              type: 'database',
+              url,
+              databaseName: name,
+              users: [{ username: name, passwd: 'test' }],
+            },
+            {
+              type: 'documentcollection',
+              databaseName: name,
+              url,
+              name: 'places',
+              options: { schema, waitForSync: true },
+            },
+          ])
+
+          const conn = new Database({ url, databaseName: name })
+          await conn.login(name, 'test')
+          const properties = await conn.collection('places').properties()
+
+          expect(properties).toMatchObject({ schema, waitForSync: true })
+        } finally {
+          await system.dropDatabase(name)
+          await deleteUser(system, name)
+        }
+      })
+    })
+  })
+
   describe('as root', () => {
     it('returns a working query function', async () => {
       const { migrate } = ArangoTools({ rootPass, url })
