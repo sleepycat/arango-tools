@@ -1,6 +1,6 @@
-const { parse } = require('path')
 const { Database } = require('arangojs')
 require('dotenv-safe').config()
+const { dbNameFromFile  } = require('../utils')
 const { createUser } = require('../createUser')
 const { deleteUser } = require('../deleteUser')
 
@@ -9,8 +9,6 @@ const {
   ARANGOTOOLS_DB_PASSWORD: password,
 } = process.env
 
-const generateName = () =>
-  parse(__filename).base.replace(/\./g, '_') + '_' + Date.now()
 
 const rootPass = password
 let sys
@@ -23,10 +21,12 @@ describe('createUser', () => {
   })
 
   it('creates a user in ArangoDB', async () => {
-    const name = generateName()
+    const name = 'creates_a_user_' + dbNameFromFile(__filename)
     await sys.createDatabase(name)
 
-    const randomName = `createuser_succceeds_{Math.random().toString(36).substring(7)}`
+    const randomName = `createuser_succceeds_${Math.random()
+      .toString(36)
+      .substring(7)}`
     const user = await createUser(sys, {
       user: randomName,
       passwd: 'soopersekret',
@@ -39,21 +39,27 @@ describe('createUser', () => {
   })
 
   it(`doesn't barf if the user exists`, async () => {
+    const name = `createuser_when_user_exists_${Math.random()
+      .toString(36)
+      .substring(7)}`
 
-    const name = `createuser_when_user_exists_${Math.random().toString(36).substring(7)}`
-
+    // existing user
     await createUser(sys, {
       user: name,
       passwd: 'soopersekret',
     })
 
     try {
-      expect(async () => {
-        await createUser(sys, {
+      await expect(
+        createUser(sys, {
           user: name,
           passwd: 'soopersekret',
-        })
-      }).not.toThrow()
+        }),
+      ).resolves.toMatchObject({
+        active: true,
+        extra: {},
+        user: name,
+      })
     } finally {
       await deleteUser(sys, name)
     }
