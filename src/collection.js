@@ -88,7 +88,7 @@ async function updateMutableProperties({
   return { collection: updated, message: false }
 }
 
-async function collection({ connection, name, type = 'document', options }) {
+async function collection({ connection, name, type = 'document', options = {} }) {
   const collection = connection.collection(name)
   let exists
   try {
