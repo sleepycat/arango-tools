@@ -10,6 +10,53 @@ const {
 describe('ensure', () => {
   describe('as a user', () => {
     describe('with an existing database', () => {
+      it.only(`doesn't freak out when no options are passed`, async () => {
+        const name = dbNameFromFile(__filename)
+        const sys = new Database({ url })
+        await sys.login('root', rootPassword)
+
+        // make the database
+        await sys.createDatabase(name, {
+          users: [{ user: name, passwd: 'test', active: true }],
+        })
+
+        // create a collection
+        const connection = new Database({ url, databaseName: name })
+        await connection.login(name, 'test')
+        const collection = connection.collection('users')
+        await collection.create()
+
+        try {
+          // try to verify with ensure
+          await ensure({
+            type: 'database',
+            name,
+            url,
+            options: [
+              { type: 'user', username: 'root', password: rootPassword },
+              {
+                type: 'documentcollection',
+                name: 'users',
+              },
+            ],
+          })
+
+          const db = new Database({ url, databaseName: name })
+          await db.login(name, 'test')
+
+          const collection = db.collection('users')
+          const info = await collection.get()
+
+          expect(info).toMatchObject({})
+        } finally {
+          await sys.dropDatabase(name)
+          await deleteUser(sys, name)
+        }
+      })
+    })
+  })
+  describe('as a user', () => {
+    describe('with an existing database', () => {
       it('succeeds in adding a delimiter analyzer to arango', async () => {
         const name = dbNameFromFile(__filename)
         const sys = new Database({ url })
