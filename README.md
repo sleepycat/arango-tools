@@ -148,6 +148,19 @@ await cursor.all()
 await drop()
 ```
 
+For those moments when you really just want to connect, there is also `connectTo`.
+
+```javascript
+const { query, drop, truncate, transaction } = await connectTo({
+  url: 'http://localhost:8529', // default
+  databaseName: 'mydb',
+  as: {
+    username: 'mike', // the user the returned funtions should operate with
+    password: 'secret',
+  },
+})
+```
+
 ## Issues
 
 Currently arango-tools can create a database, a document/edge collection, a search view, delimiter analyzer and a GeoIndex.
