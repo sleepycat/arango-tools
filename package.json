@@ -12,7 +12,8 @@
   "license": "MIT",
   "dependencies": {
     "arangojs": "^7.2.0",
-    "assign-deep": "^1.0.1"
+    "assign-deep": "^1.0.1",
+    "json-placeholder-replacer": "^1.0.35"
   },
   "devDependencies": {
     "dotenv-safe": "^8.2.0",

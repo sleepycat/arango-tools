@@ -34,62 +34,65 @@ The collection properties `writeConcern`, `replicationFactor`, `schema` and `wai
 const { ensure } = require('arango-tools')
 
 let { query, truncate, drop, transaction, collections } = await ensure({
-  type: 'database',
-  name: 'myapp',
-  url: 'http://localhost:8529', // default
-  rootPassword: 'secret', // optional when the database exists!
-  options: [
-    { type: 'user', username: 'mike', password: 'test' },
-    {
-      type: 'documentcollection',
-      name: 'people',
-      options: {
-        schema: {
-          rule: {
-            properties: {
-              nums: { type: 'array', items: { type: 'number', maximum: 6 } },
+  variables: { username: 'mike', password: 'test', rootPassword: 'secret' },
+  schema: {
+    type: 'database',
+    name: 'myapp',
+    url: 'http://localhost:8529', // default
+    rootPassword: '{{rootPassword}}', // optional when the database exists!
+    options: [
+      { type: 'user', username: '{{username}}', password: '{{password}}' },
+      {
+        type: 'documentcollection',
+        name: 'people',
+        options: {
+          schema: {
+            rule: {
+              properties: {
+                nums: { type: 'array', items: { type: 'number', maximum: 6 } },
+              },
+              additionalProperties: { type: 'string' },
+              required: ['nums'],
             },
-            additionalProperties: { type: 'string' },
-            required: ['nums'],
+            level: 'moderate',
+            message:
+              "The document does not contain an array of numbers in attribute 'nums', or one of the numbers is bigger than 6.",
           },
-          level: 'moderate',
-          message:
-            "The document does not contain an array of numbers in attribute 'nums', or one of the numbers is bigger than 6.",
-        },
-        waitForSync: false,
-      },
-    },
-    {
-      type: 'edgecollection',
-      name: 'likes',
-      options: { journalSize: 10485760, waitForSync: true },
-    },
-    {
-      type: 'delimiteranalyzer',
-      name: 'my-delimiter-analyzer',
-      delimiter: ';',
-    },
-    {
-      type: 'searchview',
-      name: 'placeview',
-      options: {
-        links: {
-          places: {
-            fields: {
-              name: { analyzers: ['text_en', 'my-delimiter-analyzer'] },
-              description: { analyzers: ['text_en'] },
-            },
-          },
+          waitForSync: false,
         },
       },
-    },
-    {
-      type: 'geoindex',
-      on: 'places',
-      fields: ['lat', 'lng'],
-      geoJson: true,
-    },
-  ],
+      {
+        type: 'edgecollection',
+        name: 'likes',
+        options: { journalSize: 10485760, waitForSync: true },
+      },
+      {
+        type: 'delimiteranalyzer',
+        name: 'my-delimiter-analyzer',
+        delimiter: ';',
+      },
+      {
+        type: 'searchview',
+        name: 'placeview',
+        options: {
+          links: {
+            places: {
+              fields: {
+                name: { analyzers: ['text_en', 'my-delimiter-analyzer'] },
+                description: { analyzers: ['text_en'] },
+              },
+            },
+          },
+        },
+      },
+      {
+        type: 'geoindex',
+        on: 'places',
+        fields: ['lat', 'lng'],
+        geoJson: true,
+      },
+    ],
+  },
 })
 
 // Old deprecated API 🙁

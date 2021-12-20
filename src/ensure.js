@@ -6,10 +6,21 @@ const { collectionAccessors } = require('./collectionAccessors')
 const { geoIndex } = require('./geoIndex')
 const { searchView } = require('./searchView')
 const { delimiterAnalyzer } = require('./delimiterAnalyzer')
+const { JsonPlaceholderReplacer } = require('json-placeholder-replacer')
 
-async function ensure(
-  database = { url: 'http://localhost:8529', options: [] },
-) {
+async function ensure(options = {}) {
+  let database
+  // What did we get?
+  if (options.variables && options.schema) {
+    const placeHolderReplacer = new JsonPlaceholderReplacer()
+
+    placeHolderReplacer.addVariableMap(options.variables)
+
+    database = placeHolderReplacer.replace(options.schema)
+  } else {
+    database = options
+  }
+
   // output object we'll add to.
   const users = database.options.filter((opt) => opt.type === 'user')
   if (users.length > 1)
